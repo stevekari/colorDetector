@@ -1,0 +1,11 @@
+com/textile/colormatch/model/ColorData.class
+com/textile/colormatch/model/DyeAdjustment.class
+com/textile/colormatch/config/CorsConfig.class
+com/textile/colormatch/model/TrayDosing.class
+com/textile/colormatch/model/ColorComparisonResult.class
+com/textile/colormatch/model/BatchContext.class
+com/textile/colormatch/model/PretreatmentInfo.class
+com/textile/colormatch/service/ColorimetryService.class
+com/textile/colormatch/Application.class
+com/textile/colormatch/controller/ColorMatchController.class
+com/textile/colormatch/service/FormulationEngineService.class

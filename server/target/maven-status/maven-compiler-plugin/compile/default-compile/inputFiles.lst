@@ -1,0 +1,11 @@
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/model/DyeAdjustment.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/Application.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/model/PretreatmentInfo.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/service/ColorimetryService.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/service/FormulationEngineService.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/model/BatchContext.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/model/ColorComparisonResult.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/model/TrayDosing.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/model/ColorData.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/config/CorsConfig.java
+/Users/stephenkarikari/Desktop/programming/Textile/server/src/main/java/com/textile/colormatch/controller/ColorMatchController.java

@@ -1,0 +1,138 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@layer base {
+  body {
+    @apply bg-[#0b111c] text-slate-100 font-sans antialiased;
+    background: radial-gradient(circle at 50% 10%, #152238 0%, #0a0f18 100%);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background-color: rgba(6, 182, 212, 0.3);
+    color: rgb(165, 243, 252);
+  }
+
+  html {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Custom Industrial UI styling */
+.panel-metallic {
+  background: linear-gradient(180deg, #1b263b 0%, #0f172a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+    0 10px 25px -5px rgba(0, 0, 0, 0.7);
+}
+
+.panel-sub-card {
+  background: linear-gradient(180deg, #162032 0%, #0e1522 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bezel-frame {
+  border: 2px solid #2a3b53;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.8),
+    0 2px 4px rgba(255, 255, 255, 0.05);
+}
+
+.fabric-texture {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 0),
+    radial-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 0);
+  background-size: 4px 4px;
+  background-position:
+    0 0,
+    2px 2px;
+}
+
+.scanline-anim {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(0, 229, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 100% 8px;
+  animation: scan 3s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(1000%);
+  }
+}
+
+/* Tactile button style matching the mockup's Status button */
+.btn-tactile-green {
+  background: linear-gradient(180deg, #5da738 0%, #3e7b22 50%, #2f6019 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.5);
+  border: 1px solid #73cf45;
+}
+
+.btn-tactile-green:hover {
+  background: linear-gradient(180deg, #6bc041 0%, #4a912a 50%, #38721e 100%);
+}
+
+.btn-tactile-red {
+  background: linear-gradient(180deg, #d32f2f 0%, #b71c1c 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    0 4px 6px rgba(0, 0, 0, 0.4);
+  border: 1px solid #ef5350;
+}
+
+.btn-tactile-blue {
+  background: linear-gradient(180deg, #1976d2 0%, #0d47a1 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    0 4px 6px rgba(0, 0, 0, 0.4);
+  border: 1px solid #42a5f5;
+}
+
+.btn-tactile-yellow {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    0 4px 6px rgba(0, 0, 0, 0.4);
+  border: 1px solid #fbbf24;
+}
+
+/* Mobile responsive utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.touch-pan-x {
+  touch-action: pan-x;
+}
+
+.touch-pan-y {
+  touch-action: pan-y;
+}
