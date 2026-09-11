@@ -1,0 +1,22 @@
+.git
+.github
+.vscode
+.idea
+.DS_Store
+*.log
+
+# Client ignores
+client/node_modules
+client/dist
+client/.env*.local
+client/npm-debug.log*
+
+# Server ignores
+server/target
+server/.flattened-pom.xml
+server/*.jar
+
+# Local scratch
+scratch/
+brain/
+

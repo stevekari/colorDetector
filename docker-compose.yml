@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  # Option 1: Full-Stack Unified Container (Matches Render Production)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: textile-qc-app
+    environment:
+      - PORT=8080
+      - JAVA_OPTS=-Xms128m -Xmx512m
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  # Option 2: Standalone Spring Boot Backend (For separate development)
+  # backend:
+  #   build:
+  #     context: ./server
+  #     dockerfile: Dockerfile
+  #   container_name: textile-backend
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - PORT=8080
+
+  # Option 3: Standalone React Frontend with Nginx
+  # frontend:
+  #   build:
+  #     context: ./client
+  #     dockerfile: Dockerfile
+  #   container_name: textile-frontend
+  #   ports:
+  #     - "5173:80"
+  #   depends_on:
+  #     - backend
