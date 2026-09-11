@@ -399,35 +399,35 @@ export default function MiddleContainer({
   const isMatch = analysis?.isMatch ?? false;
 
   return (
-    <div className="w-full flex-1 flex flex-col panel-metallic rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl min-h-[440px] sm:min-h-[490px]">
+    <div className="w-full max-w-full flex-1 flex flex-col panel-metallic rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl">
       
       {/* Panel Header */}
-      <div className="px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#172338] via-[#141f32] to-[#111a2a] border-b border-slate-700/70 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center space-x-2">
+      <div className="w-full max-w-full px-2.5 sm:px-5 py-2 sm:py-3 bg-gradient-to-r from-[#172338] via-[#141f32] to-[#111a2a] border-b border-slate-700/70 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
+        <div className="flex items-center space-x-1.5 sm:space-x-2">
           
           {/* Toggle between Color Sensor and QR Scanner */}
           <div className="flex items-center bg-[#090f18] p-0.5 rounded-lg border border-slate-700 text-xs">
             <button
               onClick={() => setScannerMode('COLOR_SENSOR')}
-              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer ${
+              className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-md font-bold text-[10px] sm:text-xs transition-all cursor-pointer ${
                 scannerMode === 'COLOR_SENSOR'
                   ? 'bg-cyan-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Camera className={`w-3.5 h-3.5 ${isWebcamActive ? 'text-emerald-300 animate-pulse' : ''}`} />
+              <Camera className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isWebcamActive ? 'text-emerald-300 animate-pulse' : ''}`} />
               <span>Color Sensor</span>
             </button>
 
             <button
               onClick={() => setScannerMode('QR_SCANNER')}
-              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer ${
+              className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-md font-bold text-[10px] sm:text-xs transition-all cursor-pointer ${
                 scannerMode === 'QR_SCANNER'
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <QrCode className="w-3.5 h-3.5 text-purple-300" />
+              <QrCode className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-purple-300" />
               <span>Dye Box QR</span>
             </button>
           </div>
@@ -435,49 +435,38 @@ export default function MiddleContainer({
           {isWebcamActive && (
             <span className="hidden sm:flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/50 text-[10px] font-mono text-emerald-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-              <span>LIVE CAMERA ACTIVE</span>
+              <span>LIVE</span>
             </span>
           )}
         </div>
 
         {/* Scan Mode Destination: Target vs Sample (Only in Color Sensor Mode) */}
         {scannerMode === 'COLOR_SENSOR' && (
-          <div className="flex items-center bg-[#090e17] rounded-lg p-1 border border-slate-700 space-x-1">
-            <span className="text-[10px] text-slate-400 font-medium px-1 hidden md:inline">{t.captureAs}</span>
-            
+          <div className="flex items-center bg-[#090e17] rounded-lg p-0.5 sm:p-1 border border-slate-700 space-x-1">
             <button
               onClick={() => setScanDestination('TARGET')}
-              className={`flex items-center space-x-1 px-2 py-1 rounded text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center space-x-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
                 scanDestination === 'TARGET'
                   ? 'bg-rose-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Captured scan will be set as Original Target Color"
             >
-              <Target className="w-3 h-3" />
+              <Target className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
               <span>{t.originalTarget}</span>
             </button>
 
             <button
               onClick={() => setScanDestination('SAMPLE')}
-              className={`flex items-center space-x-1 px-2 py-1 rounded text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center space-x-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
                 scanDestination === 'SAMPLE'
                   ? 'bg-cyan-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Captured scan will be set as Autoclave Test Sample Color"
             >
-              <FlaskConical className="w-3 h-3" />
+              <FlaskConical className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
               <span>{t.sampleTest}</span>
-            </button>
-
-            <button
-              onClick={onOpenAiBot}
-              className="flex items-center space-x-1.5 px-2 py-1 rounded text-[10px] sm:text-[11px] font-bold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md shadow-purple-600/30 transition-all cursor-pointer active:scale-95 border border-purple-400/40 group"
-              title="Open Textile AI Assistant Bot & Search Engine for Answers"
-            >
-              <Bot className="w-3.5 h-3.5 text-purple-200 animate-pulse group-hover:rotate-12 transition-transform" />
-              <span>{t.aiBot || 'Ask AI Bot'}</span>
             </button>
           </div>
         )}
@@ -605,26 +594,26 @@ export default function MiddleContainer({
           onClick={handleChamberClick}
           onTouchStart={handleTouchMove}
           onTouchMove={handleTouchMove}
-          className="relative w-full max-w-xl h-52 sm:h-64 md:h-72 bg-[#05080e] rounded-lg border-2 border-[#1f2d40] shadow-[inset_0_10px_30px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col justify-end cursor-crosshair group select-none touch-none"
+          className="relative w-full max-w-xl h-44 sm:h-56 md:h-64 bg-[#05080e] rounded-lg border-2 border-[#1f2d40] shadow-[inset_0_10px_30px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col justify-end cursor-crosshair group select-none touch-none"
         >
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#0c1320_1px,transparent_1px),linear-gradient(to_bottom,#0c1320_1px,transparent_1px)] bg-[size:20px_20px] sm:bg-[size:24px_24px] opacity-40 pointer-events-none"></div>
 
           {/* On-Camera Target Guide HUD */}
           {mode === 'webcam' && (
-            <div className="absolute inset-x-3 top-3 z-40 p-2 rounded-lg bg-black/80 backdrop-blur-md border border-cyan-500/60 text-white text-xs flex items-center justify-between shadow-2xl animate-fade-in">
-              <div className="flex items-center space-x-2">
+            <div className="absolute inset-x-2 sm:inset-x-3 top-2 sm:top-3 z-40 p-1.5 sm:p-2 rounded-lg bg-black/80 backdrop-blur-md border border-cyan-500/60 text-white text-xs flex items-center justify-between shadow-2xl animate-fade-in">
+              <div className="flex items-center space-x-1.5 min-w-0">
                 {scanDestination === 'TARGET' ? (
-                  <Target className="w-4 h-4 text-rose-400 animate-pulse" />
+                  <Target className="w-3.5 h-3.5 text-rose-400 animate-pulse flex-shrink-0" />
                 ) : (
-                  <FlaskConical className="w-4 h-4 text-cyan-400 animate-pulse" />
+                  <FlaskConical className="w-3.5 h-3.5 text-cyan-400 animate-pulse flex-shrink-0" />
                 )}
-                <span className="font-semibold text-[11px] sm:text-xs">
+                <span className="font-semibold text-[10px] sm:text-xs truncate">
                   {scanDestination === 'TARGET' 
-                    ? 'Position Original Standard fabric -> Click Capture to lock code' 
-                    : 'Position Dye-bath Sample fabric -> Click Capture to measure ΔE'}
+                    ? 'Scan Target -> Capture' 
+                    : 'Scan Sample -> Capture'}
                 </span>
               </div>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+              <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold flex-shrink-0 ml-1 ${
                 scanDestination === 'TARGET' ? 'bg-rose-600 text-white' : 'bg-cyan-600 text-white'
               }`}>
                 {scanDestination === 'TARGET' ? 'ORIGINAL' : 'SAMPLE'}
@@ -707,7 +696,7 @@ export default function MiddleContainer({
               </div>
             </div>
           ) : (
-            <div className="relative w-full h-36 sm:h-44 md:h-48 flex items-center justify-center px-4 sm:px-6">
+            <div className="relative w-full h-32 sm:h-40 md:h-48 flex items-center justify-center px-3 sm:px-6">
               <div 
                 className="w-full h-full rounded-t-sm shadow-2xl relative overflow-hidden transition-colors duration-500 border-t border-x border-white/20"
                 style={{ 
@@ -727,18 +716,11 @@ export default function MiddleContainer({
           )}
 
           {/* Lower Stage White Reference Bar */}
-          <div className="relative w-full h-8 sm:h-10 bg-gradient-to-b from-[#e2e8f0] via-[#cbd5e1] to-[#94a3b8] border-t-2 border-white/80 shadow-lg flex items-center justify-between px-3 sm:px-4 z-10">
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-800 tracking-wider flex items-center gap-1 sm:gap-1.5">
-              <span>{scannerMode === 'QR_SCANNER' ? 'QR INVENTORY SCANNER' : `${t.opticalStage} • ${mode === 'webcam' ? t.liveCamera : t.whiteBaseRef}`}</span>
-              {scannerMode === 'COLOR_SENSOR' && (
-                <span className={`px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-bold ${
-                  scanDestination === 'TARGET' ? 'bg-rose-600 text-white' : 'bg-cyan-700 text-white'
-                }`}>
-                  {scanDestination === 'TARGET' ? t.originalTarget : t.sampleTest}
-                </span>
-              )}
+          <div className="relative w-full h-7 sm:h-9 bg-gradient-to-b from-[#e2e8f0] via-[#cbd5e1] to-[#94a3b8] border-t-2 border-white/80 shadow-lg flex items-center justify-between px-2.5 sm:px-4 z-10">
+            <span className="text-[8px] sm:text-[10px] font-mono font-bold text-slate-800 tracking-wider flex items-center gap-1 sm:gap-1.5 truncate">
+              <span className="truncate">{scannerMode === 'QR_SCANNER' ? 'QR INVENTORY SCANNER' : `${t.opticalStage} • ${mode === 'webcam' ? t.liveCamera : t.whiteBaseRef}`}</span>
             </span>
-            <span className="text-[9px] sm:text-[10px] font-mono text-slate-700 font-bold">
+            <span className="text-[8px] sm:text-[10px] font-mono text-slate-700 font-bold flex-shrink-0 ml-1">
               {t.illuminant} {lighting}
             </span>
           </div>
@@ -750,27 +732,27 @@ export default function MiddleContainer({
               style={{ left: `${crosshairPos.x}%`, top: `${crosshairPos.y}%` }}
             >
               <div className="relative flex items-center justify-center">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 shadow-lg animate-pulse ${
+                <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 shadow-lg animate-pulse ${
                   scanDestination === 'TARGET' 
                     ? 'border-rose-400 shadow-[0_0_12px_#f43f5e]' 
                     : 'border-cyan-400 shadow-[0_0_12px_#00e5ff]'
                 }`}></div>
-                <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${
+                <div className={`w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full ${
                   scanDestination === 'TARGET' ? 'bg-rose-300' : 'bg-cyan-300'
                 } shadow-[0_0_8px_#ffffff]`}></div>
-                <div className={`absolute w-12 sm:w-16 h-[1px] ${
+                <div className={`absolute w-10 sm:w-16 h-[1px] ${
                   scanDestination === 'TARGET' ? 'bg-rose-400/70' : 'bg-cyan-400/70'
                 }`}></div>
-                <div className={`absolute h-12 sm:h-16 w-[1px] ${
+                <div className={`absolute h-10 sm:h-16 w-[1px] ${
                   scanDestination === 'TARGET' ? 'bg-rose-400/70' : 'bg-cyan-400/70'
                 }`}></div>
                 
-                <div className="absolute -top-6 sm:-top-7 flex items-center space-x-1 px-1.5 py-0.5 rounded bg-black/90 border border-slate-700 shadow-lg">
+                <div className="absolute -top-5 sm:-top-7 flex items-center space-x-1 px-1 sm:px-1.5 py-0.5 rounded bg-black/90 border border-slate-700 shadow-lg">
                   <span 
                     className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full border border-white/40"
                     style={{ backgroundColor: sampleColor }}
                   />
-                  <span className={`text-[8px] sm:text-[9px] font-mono font-bold ${
+                  <span className={`text-[7px] sm:text-[9px] font-mono font-bold ${
                     scanDestination === 'TARGET' ? 'text-rose-400' : 'text-cyan-300'
                   }`}>
                     {sampleColor}
@@ -881,15 +863,15 @@ export default function MiddleContainer({
         </div>
 
         {/* Live Optical Color Match & Difference HUD (Mobile-friendly side-by-side live comparison) */}
-        <div className="w-full max-w-xl mt-2.5 bg-[#090f19] border border-slate-700/80 rounded-xl p-2.5 sm:p-3 shadow-xl">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
-            <div className="flex items-center space-x-1.5">
-              <Scale className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="text-[11px] sm:text-xs font-bold text-slate-200 uppercase tracking-wider">
+        <div className="w-full max-w-xl mt-2 bg-[#090f19] border border-slate-700/80 rounded-xl p-2 sm:p-2.5 shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-1.5">
+            <div className="flex items-center space-x-1 sm:space-x-1.5">
+              <Scale className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-cyan-400" />
+              <span className="text-[10px] sm:text-xs font-bold text-slate-200 uppercase tracking-wider">
                 Live Color Comparison &amp; Difference
               </span>
             </div>
-            <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+            <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold ${
               deltaE <= 1.0 
                 ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/50' 
                 : deltaE <= 2.0 
@@ -901,72 +883,72 @@ export default function MiddleContainer({
           </div>
 
           {/* Side-by-Side Swatch & Difference Meter */}
-          <div className="grid grid-cols-12 gap-2 items-center">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 items-center">
             
             {/* Target Swatch (Original) */}
-            <div className="col-span-4 bg-[#111927] border border-slate-700 rounded-lg p-2 flex flex-col items-center text-center">
-              <div className="text-[9px] font-mono text-rose-300 uppercase font-bold flex items-center gap-1 mb-1">
-                <Target className="w-2.5 h-2.5 text-rose-400" />
-                <span>Original Standard</span>
+            <div className="bg-[#111927] border border-slate-700 rounded-lg p-1.5 sm:p-2 flex flex-col items-center text-center min-w-0">
+              <div className="text-[8px] sm:text-[9px] font-mono text-rose-300 uppercase font-bold flex items-center gap-0.5 sm:gap-1 mb-1 truncate">
+                <Target className="w-2.5 h-2.5 text-rose-400 flex-shrink-0" />
+                <span className="truncate">Original</span>
               </div>
               <div 
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border-2 border-white/40 shadow-inner mb-1.5"
+                className="w-8 h-8 sm:w-11 sm:h-11 rounded-md sm:rounded-lg border-2 border-white/40 shadow-inner mb-1"
                 style={{ backgroundColor: targetColor }}
               />
-              <div className="font-mono text-xs font-black text-white">{targetColor}</div>
+              <div className="font-mono text-[10px] sm:text-xs font-black text-white truncate">{targetColor}</div>
               {analysis?.target && (
-                <div className="text-[9px] font-mono text-slate-400 mt-0.5">
-                  L*:{analysis.target.L?.toFixed(0)} a*:{analysis.target.a?.toFixed(0)} b*:{analysis.target.bStar?.toFixed(0)}
+                <div className="text-[8px] sm:text-[9px] font-mono text-slate-400 mt-0.5 truncate hidden xs:block">
+                  L:{analysis.target.L?.toFixed(0)} a:{analysis.target.a?.toFixed(0)} b:{analysis.target.bStar?.toFixed(0)}
                 </div>
               )}
             </div>
 
             {/* Difference Gauge (Delta E & Shifts) */}
-            <div className="col-span-4 flex flex-col items-center justify-center text-center px-1">
-              <div className="text-[9px] font-mono text-slate-400 uppercase font-bold">Total Difference</div>
-              <div className={`font-mono text-xl sm:text-2xl font-black ${
+            <div className="flex flex-col items-center justify-center text-center px-0.5 sm:px-1 min-w-0">
+              <div className="text-[8px] sm:text-[9px] font-mono text-slate-400 uppercase font-bold truncate">Difference</div>
+              <div className={`font-mono text-base sm:text-2xl font-black ${
                 deltaE <= 1.0 ? 'text-emerald-400' : deltaE <= 2.0 ? 'text-amber-400' : 'text-rose-400'
               }`}>
                 &Delta;E {deltaE.toFixed(1)}
               </div>
               
               {/* Optical Shift Badges */}
-              <div className="w-full flex flex-col gap-0.5 mt-1 text-[9px] font-mono">
-                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded">
+              <div className="w-full flex flex-col gap-0.5 mt-0.5 text-[8px] sm:text-[9px] font-mono">
+                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded">
                   <span>&Delta;L*:</span>
                   <span className={analysis?.deltaL > 0 ? 'text-amber-300 font-bold' : 'text-cyan-300 font-bold'}>
-                    {analysis?.deltaL ? (analysis.deltaL > 0 ? `+${analysis.deltaL.toFixed(1)} (Light)` : `${analysis.deltaL.toFixed(1)} (Dark)`) : '0.0'}
+                    {analysis?.deltaL ? (analysis.deltaL > 0 ? `+${analysis.deltaL.toFixed(1)}` : `${analysis.deltaL.toFixed(1)}`) : '0.0'}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded">
+                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded">
                   <span>&Delta;a*:</span>
                   <span className={analysis?.deltaA > 0 ? 'text-rose-300 font-bold' : 'text-emerald-300 font-bold'}>
-                    {analysis?.deltaA ? (analysis.deltaA > 0 ? `+${analysis.deltaA.toFixed(1)} (Red)` : `${analysis.deltaA.toFixed(1)} (Green)`) : '0.0'}
+                    {analysis?.deltaA ? (analysis.deltaA > 0 ? `+${analysis.deltaA.toFixed(1)}` : `${analysis.deltaA.toFixed(1)}`) : '0.0'}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded">
+                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded">
                   <span>&Delta;b*:</span>
                   <span className={analysis?.deltaB > 0 ? 'text-yellow-300 font-bold' : 'text-blue-300 font-bold'}>
-                    {analysis?.deltaB ? (analysis.deltaB > 0 ? `+${analysis.deltaB.toFixed(1)} (Yel)` : `${analysis.deltaB.toFixed(1)} (Blue)`) : '0.0'}
+                    {analysis?.deltaB ? (analysis.deltaB > 0 ? `+${analysis.deltaB.toFixed(1)}` : `${analysis.deltaB.toFixed(1)}`) : '0.0'}
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Sample Swatch (Autoclave Test) */}
-            <div className="col-span-4 bg-[#111927] border border-slate-700 rounded-lg p-2 flex flex-col items-center text-center">
-              <div className="text-[9px] font-mono text-cyan-300 uppercase font-bold flex items-center gap-1 mb-1">
-                <FlaskConical className="w-2.5 h-2.5 text-cyan-400" />
-                <span>Test Sample</span>
+            <div className="bg-[#111927] border border-slate-700 rounded-lg p-1.5 sm:p-2 flex flex-col items-center text-center min-w-0">
+              <div className="text-[8px] sm:text-[9px] font-mono text-cyan-300 uppercase font-bold flex items-center gap-0.5 sm:gap-1 mb-1 truncate">
+                <FlaskConical className="w-2.5 h-2.5 text-cyan-400 flex-shrink-0" />
+                <span className="truncate">Sample</span>
               </div>
               <div 
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border-2 border-white/40 shadow-inner mb-1.5"
+                className="w-8 h-8 sm:w-11 sm:h-11 rounded-md sm:rounded-lg border-2 border-white/40 shadow-inner mb-1"
                 style={{ backgroundColor: sampleColor }}
               />
-              <div className="font-mono text-xs font-black text-white">{sampleColor}</div>
+              <div className="font-mono text-[10px] sm:text-xs font-black text-white truncate">{sampleColor}</div>
               {analysis?.sample && (
-                <div className="text-[9px] font-mono text-slate-400 mt-0.5">
-                  L*:{analysis.sample.L?.toFixed(0)} a*:{analysis.sample.a?.toFixed(0)} b*:{analysis.sample.bStar?.toFixed(0)}
+                <div className="text-[8px] sm:text-[9px] font-mono text-slate-400 mt-0.5 truncate hidden xs:block">
+                  L:{analysis.sample.L?.toFixed(0)} a:{analysis.sample.a?.toFixed(0)} b:{analysis.sample.bStar?.toFixed(0)}
                 </div>
               )}
             </div>
@@ -975,16 +957,16 @@ export default function MiddleContainer({
 
           {/* AI Recommended Action Pill (if mismatch) */}
           {deltaE > 1.0 && analysis?.advices && analysis.advices.length > 0 && (
-            <div className="mt-2 p-1.5 sm:p-2 rounded-lg bg-purple-950/60 border border-purple-500/40 flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-1.5 min-w-0">
-                <Sparkles className="w-3.5 h-3.5 text-purple-300 flex-shrink-0 animate-pulse" />
-                <span className="text-[10px] sm:text-[11px] text-purple-200 font-medium truncate">
+            <div className="mt-1.5 p-1 sm:p-1.5 rounded-lg bg-purple-950/60 border border-purple-500/40 flex items-center justify-between gap-1.5">
+              <div className="flex items-center space-x-1 min-w-0">
+                <Sparkles className="w-3 h-3 text-purple-300 flex-shrink-0 animate-pulse" />
+                <span className="text-[9px] sm:text-[11px] text-purple-200 font-medium truncate">
                   <strong className="text-white">AI Advice:</strong> {analysis.advices[0].text || analysis.advices[0].instruction}
                 </span>
               </div>
               <button
                 onClick={onMatchPerfect}
-                className="px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[10px] whitespace-nowrap cursor-pointer shadow active:scale-95 flex-shrink-0"
+                className="px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[9px] sm:text-[10px] whitespace-nowrap cursor-pointer shadow active:scale-95 flex-shrink-0"
               >
                 Equalize
               </button>

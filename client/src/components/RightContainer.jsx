@@ -122,7 +122,7 @@ export default function RightContainer({
   };
 
   return (
-    <div className="w-full lg:w-[320px] xl:w-[360px] flex flex-col panel-metallic rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl">
+    <div className="w-full max-w-full flex-1 flex flex-col panel-metallic rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl">
       
       {/* Panel Header */}
       <div className="px-4 sm:px-5 py-3.5 bg-gradient-to-r from-[#172338] to-[#111a2a] border-b border-slate-700/70 flex items-center justify-between">

@@ -20,8 +20,8 @@ export default function App() {
   // Screen Navigation State: 'DASHBOARD' | 'AUTOCLAVE'
   const [activeScreen, setActiveScreen] = useState('DASHBOARD');
 
-  // Mobile View Switcher State: 'ALL' | 'CAMERA' | 'ANALYSIS' | 'METRIC'
-  const [mobileTab, setMobileTab] = useState('ALL');
+  // Mobile View Switcher State: 'CAMERA' | 'ANALYSIS' | 'METRIC' | 'ALL'
+  const [mobileTab, setMobileTab] = useState('CAMERA');
 
   // Language Selection State: 'EN' | 'ES' | 'FR' | 'DE' | 'NL' | 'PR' | 'Twi'
   const [currentLang, setCurrentLang] = useState(() => {
@@ -324,7 +324,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b12] text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#070b12] text-slate-100 flex flex-col justify-between">
       
       {/* Top Navigation Bar with Language Switcher, Recipe Loader & Tools */}
       <TopNavbar 
@@ -348,73 +348,66 @@ export default function App() {
       />
 
       {/* Mobile Ergonomic View Switcher (Visible on screens < lg) */}
-      <div className="lg:hidden w-full max-w-[1600px] mx-auto px-3 pt-2.5">
-        <div className="bg-[#0e1624] border border-slate-700/80 rounded-xl p-1 grid grid-cols-4 gap-1 shadow-lg text-center">
+      <div className="lg:hidden w-full max-w-[1600px] mx-auto px-2 sm:px-3 pt-2">
+        <div className="bg-[#0e1624] border border-slate-700/80 rounded-xl p-0.5 sm:p-1 grid grid-cols-4 gap-1 shadow-lg text-center">
           <button
             onClick={() => setMobileTab('CAMERA')}
-            className={`py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all cursor-pointer ${
+            className={`py-1.5 sm:py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition-all cursor-pointer ${
               mobileTab === 'CAMERA' 
                 ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
             }`}
           >
-            <Camera className="w-4 h-4" />
+            <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-[10px] sm:text-xs">Scanner</span>
           </button>
 
           <button
             onClick={() => setMobileTab('ANALYSIS')}
-            className={`py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all cursor-pointer relative ${
+            className={`py-1.5 sm:py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition-all cursor-pointer relative ${
               mobileTab === 'ANALYSIS' 
                 ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
             }`}
           >
-            <Gauge className="w-4 h-4" />
+            <Gauge className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-[10px] sm:text-xs">Analysis</span>
-            {analysis && (
-              <span className={`hidden xs:inline-block ml-0.5 px-1 py-0.2 rounded text-[9px] font-mono font-bold ${
-                analysis.isMatch ? 'bg-emerald-950 text-emerald-300' : 'bg-amber-950 text-amber-300'
-              }`}>
-                &Delta;E {analysis.deltaE.toFixed(1)}
-              </span>
-            )}
           </button>
 
           <button
             onClick={() => setMobileTab('METRIC')}
-            className={`py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all cursor-pointer ${
+            className={`py-1.5 sm:py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition-all cursor-pointer ${
               mobileTab === 'METRIC' 
                 ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
             }`}
           >
-            <SlidersHorizontal className="w-4 h-4" />
+            <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-[10px] sm:text-xs">Dosing</span>
           </button>
 
           <button
             onClick={() => setMobileTab('ALL')}
-            className={`py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all cursor-pointer ${
+            className={`py-1.5 sm:py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition-all cursor-pointer ${
               mobileTab === 'ALL' 
                 ? 'bg-slate-700 text-white shadow-md border border-slate-600' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
             }`}
           >
-            <LayoutGrid className="w-4 h-4" />
+            <LayoutGrid className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-[10px] sm:text-xs">Overview</span>
           </button>
         </div>
       </div>
 
       {/* Main 3-Panel Industrial Dashboard Cockpit */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-4 lg:p-6 flex flex-col justify-center">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto p-2 sm:p-4 lg:p-6 flex flex-col justify-start overflow-x-hidden">
         
         {/* The 3-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 xl:gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 xl:gap-6 items-start w-full max-w-full">
           
           {/* Left Panel: Real-Time Evaluation / Color Analysis */}
-          <div className={`lg:col-span-3 ${
+          <div className={`lg:col-span-3 w-full ${
             mobileTab === 'ANALYSIS' || mobileTab === 'ALL' ? 'flex' : 'hidden lg:flex'
           }`}>
             <LeftContainer 
@@ -428,7 +421,7 @@ export default function App() {
           </div>
 
           {/* Middle Panel: Live Sample Scan / Camera Sensor / QR Dye Box Scanner */}
-          <div className={`lg:col-span-6 ${
+          <div className={`lg:col-span-6 w-full ${
             mobileTab === 'CAMERA' || mobileTab === 'ALL' ? 'flex' : 'hidden lg:flex'
           }`}>
             <MiddleContainer 
@@ -447,7 +440,7 @@ export default function App() {
           </div>
 
           {/* Right Panel: Metric & Color Data & Suggested Corrections */}
-          <div className={`lg:col-span-3 ${
+          <div className={`lg:col-span-3 w-full ${
             mobileTab === 'METRIC' || mobileTab === 'ALL' ? 'flex' : 'hidden lg:flex'
           }`}>
             <RightContainer 
@@ -471,7 +464,7 @@ export default function App() {
       </main>
 
       {/* Bottom Status Ticker & Copyright Footer */}
-      <footer className="w-full bg-[#05080e] border-t border-slate-800/80 px-4 py-2.5 text-[11px] font-mono text-slate-500 flex flex-col gap-2">
+      <footer className="w-full max-w-full overflow-x-hidden bg-[#05080e] border-t border-slate-800/80 px-3 sm:px-4 py-2 text-[10px] sm:text-[11px] font-mono text-slate-500 flex flex-col gap-1.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-3">
             <span className="flex items-center space-x-1.5 text-slate-400">
