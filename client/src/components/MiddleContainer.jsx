@@ -65,6 +65,27 @@ export default function MiddleContainer({
   const [scannedDyeBox, setScannedDyeBox] = useState(null);
   const [qrScanSuccessMsg, setQrScanSuccessMsg] = useState('');
 
+  // Scanned / Preset Multi-Color History Strip
+  const [scannedHistory, setScannedHistory] = useState([
+    '#C82030', // Original Target Crimson
+    '#D2453A', // Batch Sample Test
+    '#A01524', // Deep Ruby
+    '#E05530', // Orange Cast
+    '#E8606B', // Pink Swatch
+    '#2E7D32', // Forest Green
+    '#1565C0', // Royal Blue
+    '#FBC02D'  // Golden Yellow
+  ]);
+
+  const addToHistory = useCallback((hex) => {
+    if (!hex) return;
+    const cleanHex = hex.toUpperCase();
+    setScannedHistory(prev => {
+      const filtered = prev.filter(c => c.toUpperCase() !== cleanHex);
+      return [cleanHex, ...filtered].slice(0, 12);
+    });
+  }, []);
+
   // Scan Destination selection: 'SAMPLE' | 'TARGET' | 'ASK'
   const [scanDestination, setScanDestination] = useState('SAMPLE');
   const [pendingCaptureColor, setPendingCaptureColor] = useState(null);
@@ -285,6 +306,8 @@ export default function MiddleContainer({
     }
 
     if (!capturedHex) return;
+
+    addToHistory(capturedHex);
 
     const dest = forcedDestination || scanDestination;
 
@@ -598,10 +621,10 @@ export default function MiddleContainer({
         >
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#0c1320_1px,transparent_1px),linear-gradient(to_bottom,#0c1320_1px,transparent_1px)] bg-[size:20px_20px] sm:bg-[size:24px_24px] opacity-40 pointer-events-none"></div>
 
-          {/* On-Camera Target Guide HUD */}
+          {/* On-Camera Target Guide HUD & Instant Camera Flip Button */}
           {mode === 'webcam' && (
-            <div className="absolute inset-x-2 sm:inset-x-3 top-2 sm:top-3 z-40 p-1.5 sm:p-2 rounded-lg bg-black/80 backdrop-blur-md border border-cyan-500/60 text-white text-xs flex items-center justify-between shadow-2xl animate-fade-in">
-              <div className="flex items-center space-x-1.5 min-w-0">
+            <div className="absolute inset-x-2 sm:inset-x-3 top-2 sm:top-3 z-40 flex items-center justify-between gap-1.5 animate-fade-in pointer-events-auto">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-black/85 backdrop-blur-md border border-cyan-500/60 text-white text-xs flex items-center space-x-1.5 shadow-2xl min-w-0 flex-1">
                 {scanDestination === 'TARGET' ? (
                   <Target className="w-3.5 h-3.5 text-rose-400 animate-pulse flex-shrink-0" />
                 ) : (
@@ -609,15 +632,30 @@ export default function MiddleContainer({
                 )}
                 <span className="font-semibold text-[10px] sm:text-xs truncate">
                   {scanDestination === 'TARGET' 
-                    ? 'Scan Target -> Capture' 
-                    : 'Scan Sample -> Capture'}
+                    ? 'Scan Target Standard -> Capture' 
+                    : 'Scan Test Sample -> Capture'}
+                </span>
+                <span className={`px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-mono font-bold flex-shrink-0 ${
+                  scanDestination === 'TARGET' ? 'bg-rose-600 text-white' : 'bg-cyan-600 text-white'
+                }`}>
+                  {scanDestination === 'TARGET' ? 'TARGET' : 'SAMPLE'}
                 </span>
               </div>
-              <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold flex-shrink-0 ml-1 ${
-                scanDestination === 'TARGET' ? 'bg-rose-600 text-white' : 'bg-cyan-600 text-white'
-              }`}>
-                {scanDestination === 'TARGET' ? 'ORIGINAL' : 'SAMPLE'}
-              </span>
+
+              {/* Instant Camera Flip Button (Back / Front) */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCameraFacing();
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-black/85 hover:bg-black backdrop-blur-md border border-cyan-400 text-cyan-300 hover:text-white shadow-2xl flex items-center space-x-1 cursor-pointer active:scale-90 transition-all flex-shrink-0"
+                title={`Switch camera (Currently ${facingMode === 'environment' ? 'Rear / Back Camera' : 'Front / Selfie Camera'})`}
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-cyan-400 active:rotate-180 transition-transform duration-300" />
+                <span className="text-[10px] font-mono font-bold">
+                  {facingMode === 'environment' ? 'Rear 📷' : 'Front 🤳'}
+                </span>
+              </button>
             </div>
           )}
 
@@ -1059,7 +1097,17 @@ export default function MiddleContainer({
 
           {/* When Camera is active: Capture Bar */}
           {mode === 'webcam' && (
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-[#09101b] border border-cyan-500/40 animate-fade-in">
+            <div className="flex items-center gap-1.5 p-1.5 sm:p-2 rounded-xl bg-[#09101b] border border-cyan-500/40 animate-fade-in">
+              {/* Camera Flip button */}
+              <button
+                onClick={toggleCameraFacing}
+                className="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white text-xs font-bold border border-slate-600 flex items-center gap-1 cursor-pointer active:scale-95 flex-shrink-0"
+                title={`Flip camera (Currently ${facingMode === 'environment' ? 'Rear' : 'Front'})`}
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="text-[10px] hidden xs:inline">{facingMode === 'environment' ? 'Rear' : 'Front'}</span>
+              </button>
+
               {capturedSnapshot ? (
                 <button
                   onClick={() => {
@@ -1078,7 +1126,7 @@ export default function MiddleContainer({
                     className="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
                   >
                     <Target className="w-4 h-4" />
-                    <span>Capture Original Standard</span>
+                    <span>Capture Target Standard</span>
                   </button>
                 ) : (
                   <button
@@ -1086,7 +1134,7 @@ export default function MiddleContainer({
                     className="flex-1 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
                   >
                     <FlaskConical className="w-4 h-4" />
-                    <span>Capture Sample Swatch</span>
+                    <span>Capture Test Sample</span>
                   </button>
                 )
               )}
@@ -1097,14 +1145,84 @@ export default function MiddleContainer({
                   stopCamera();
                   setMode('simulation');
                 }}
-                className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-600 cursor-pointer"
+                className="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-600 cursor-pointer flex-shrink-0"
               >
                 {t.closeCamera}
               </button>
             </div>
           )}
 
-          {/* Test Swatch Pills (Swipeable on mobile) */}
+          {/* Multi-Color Swatch Tray & Quick Comparison */}
+          <div className="w-full bg-[#080e18] border border-slate-800 rounded-xl p-2 sm:p-2.5 shadow-md">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] sm:text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
+                <span>🎨 Compare Different Swatches</span>
+                <span className="text-[9px] text-slate-500 font-mono">({scannedHistory.length} colors)</span>
+              </span>
+              <span className="text-[9px] text-cyan-400 font-mono">Tap to compare &Delta;E</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x">
+              {scannedHistory.map((hex, idx) => {
+                const isCurrentTarget = targetColor.toUpperCase() === hex.toUpperCase();
+                const isCurrentSample = sampleColor.toUpperCase() === hex.toUpperCase();
+                return (
+                  <div
+                    key={`${hex}-${idx}`}
+                    className={`flex items-center space-x-1.5 px-2 py-1 rounded-lg border text-xs transition-all flex-shrink-0 ${
+                      isCurrentSample 
+                        ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-sm' 
+                        : isCurrentTarget 
+                          ? 'bg-rose-950/80 border-rose-400 text-white shadow-sm' 
+                          : 'bg-[#0f172a]/80 hover:bg-slate-800 border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    <span 
+                      className="w-3.5 h-3.5 rounded-full border border-white/30 shadow-inner flex-shrink-0"
+                      style={{ backgroundColor: hex }}
+                    />
+                    <div className="flex flex-col text-left">
+                      <span className="font-mono text-[9px] font-bold leading-none">{hex}</span>
+                      <span className="text-[8px] font-mono opacity-80 mt-0.5">
+                        {isCurrentTarget ? 'Target' : isCurrentSample ? 'Sample' : `#${idx + 1}`}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center space-x-0.5 pl-1 border-l border-slate-700/60">
+                      <button
+                        onClick={() => {
+                          setCapturedSnapshot(null);
+                          onColorSampled(hex);
+                          addToHistory(hex);
+                        }}
+                        className={`px-1 py-0.2 rounded text-[8px] font-bold cursor-pointer transition-colors ${
+                          isCurrentSample ? 'bg-cyan-600 text-white' : 'bg-slate-800 hover:bg-cyan-900 text-cyan-300'
+                        }`}
+                        title={`Compare ${hex} as Test Sample against Target`}
+                      >
+                        Sample
+                      </button>
+                      <button
+                        onClick={() => {
+                          setCapturedSnapshot(null);
+                          onTargetSampled && onTargetSampled(hex);
+                          addToHistory(hex);
+                        }}
+                        className={`px-1 py-0.2 rounded text-[8px] font-bold cursor-pointer transition-colors ${
+                          isCurrentTarget ? 'bg-rose-600 text-white' : 'bg-slate-800 hover:bg-rose-900 text-rose-300'
+                        }`}
+                        title={`Set ${hex} as Target Standard`}
+                      >
+                        Target
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Test Swatch Preset Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x">
             <span className="text-[10px] text-slate-400 font-mono flex-shrink-0 hidden sm:inline">Presets:</span>
             {presetSamples.map((p, idx) => (
@@ -1112,6 +1230,7 @@ export default function MiddleContainer({
                 key={idx}
                 onClick={() => {
                   setCapturedSnapshot(null);
+                  addToHistory(p.hex);
                   if (scanDestination === 'TARGET') {
                     onTargetSampled && onTargetSampled(p.hex);
                   } else {
