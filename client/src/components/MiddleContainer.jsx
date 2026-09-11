@@ -22,7 +22,8 @@ import {
   Edit3,
   Scale,
   Equal,
-  Bot
+  Bot,
+  Gauge
 } from 'lucide-react';
 import { rgbToHex, hexToRgb, rgbToLab, rgbToCmyk, rgbToHsl } from '../utils/colorEngine';
 import { DYE_BOX_DATABASE, findDyeByBoxCode } from '../utils/dyeDatabase';
@@ -88,29 +89,58 @@ export default function MiddleContainer({
     }
   }, [selectedDeviceId]);
 
-  // Start / Stop Webcam Stream
+  // Start / Stop Webcam Stream (Robust initialization for Mobile & Desktop)
   const startCamera = useCallback(async (deviceId, currentFacing = facingMode) => {
     setCameraError(null);
+    setCapturedSnapshot(null);
     try {
       if (videoRef.current && videoRef.current.srcObject) {
         const tracks = videoRef.current.srcObject.getTracks();
         tracks.forEach(track => track.stop());
+        videoRef.current.srcObject = null;
       }
 
-      const constraints = {
-        video: deviceId 
-          ? { deviceId: { exact: deviceId } } 
-          : { facingMode: currentFacing, width: { ideal: 1280 }, height: { ideal: 720 } }
-      };
+      let stream = null;
+      const targetFacing = currentFacing || 'environment';
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      if (videoRef.current) {
+      try {
+        const constraints = {
+          video: deviceId 
+            ? { deviceId: { exact: deviceId } } 
+            : { facingMode: { ideal: targetFacing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err1) {
+        console.warn("High-res constraint failed, trying basic facingMode:", err1);
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: targetFacing },
+            audio: false
+          });
+        } catch (err2) {
+          console.warn("FacingMode constraint failed, trying generic video:", err2);
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        }
+      }
+
+      if (videoRef.current && stream) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('webkit-playsinline', 'true');
+        videoRef.current.setAttribute('autoplay', 'true');
+        videoRef.current.setAttribute('muted', 'true');
+        videoRef.current.muted = true;
+
+        videoRef.current.onloadedmetadata = () => {
+          const p = videoRef.current?.play();
+          if (p !== undefined) {
+            p.catch(e => console.warn("Video playback exception:", e));
+          }
+        };
       }
       setIsWebcamActive(true);
       setMode('webcam');
-      setCapturedSnapshot(null);
     } catch (err) {
       console.error("Camera access error:", err);
       setCameraError(err.message || 'Camera permission denied or camera not found.');
@@ -234,10 +264,9 @@ export default function MiddleContainer({
     return null;
   }, [mode, uploadedImage]);
 
-  // Capture color handler (Automatically turns camera off after capture)
+  // Capture color handler with instant snapshot freeze and clean rescan capability
   const handleCaptureSample = (forcedDestination = null) => {
     let capturedHex = null;
-    const wasWebcam = mode === 'webcam';
 
     if (mode === 'webcam' || mode === 'image') {
       capturedHex = extractColorFromVideoOrImage(crosshairPos.x, crosshairPos.y);
@@ -263,30 +292,22 @@ export default function MiddleContainer({
       setPendingCaptureColor(capturedHex);
     } else if (dest === 'TARGET') {
       onTargetSampled && onTargetSampled(capturedHex);
-      setCaptureFeedbackMsg(`Original Color Set: ${capturedHex} (Camera OFF)`);
-      setTimeout(() => setCaptureFeedbackMsg(''), 3500);
-      if (wasWebcam) {
-        stopCamera();
-        setMode('simulation');
-      }
+      setCaptureFeedbackMsg(`Original Target Locked: ${capturedHex}`);
+      setTimeout(() => setCaptureFeedbackMsg(''), 4000);
     } else {
       onColorSampled && onColorSampled(capturedHex);
-      setCaptureFeedbackMsg(`Sample Color Set: ${capturedHex} (Camera OFF)`);
-      setTimeout(() => setCaptureFeedbackMsg(''), 3500);
-      if (wasWebcam) {
-        stopCamera();
-        setMode('simulation');
-      }
+      setCaptureFeedbackMsg(`Sample Color Locked: ${capturedHex}`);
+      setTimeout(() => setCaptureFeedbackMsg(''), 4000);
     }
   };
 
-  // Launch Camera with specific target destination
+  // Launch Camera with specific target destination (Reliably starts camera)
   const handleStartScanningDestination = (destination) => {
     setScanDestination(destination);
     setScannerMode('COLOR_SENSOR');
-    if (mode !== 'webcam') {
-      setMode('webcam');
-    }
+    setCapturedSnapshot(null);
+    setMode('webcam');
+    startCamera(selectedDeviceId, facingMode);
   };
 
   // Continuous live scan
@@ -759,6 +780,51 @@ export default function MiddleContainer({
             </div>
           )}
 
+          {/* Captured Snapshot Freeze & Resume Overlay */}
+          {mode === 'webcam' && capturedSnapshot && (
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] z-30 flex flex-col items-center justify-center p-3 text-center animate-fade-in pointer-events-auto">
+              <div className="bg-[#0b1320]/95 border border-cyan-500/60 rounded-xl p-3.5 shadow-2xl space-y-2.5 max-w-xs w-full">
+                <div className="flex items-center justify-center space-x-1.5 text-emerald-400 text-xs font-bold">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span>Color Sample Locked</span>
+                </div>
+                <div className="flex items-center justify-center space-x-2 py-1">
+                  <div className="w-5 h-5 rounded border border-white/40 shadow" style={{ backgroundColor: scanDestination === 'TARGET' ? targetColor : sampleColor }} />
+                  <span className="font-mono text-xs font-bold text-white">
+                    {scanDestination === 'TARGET' ? targetColor : sampleColor}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300">
+                  Snapshot frozen for colorimetric calculation. Ready to scan another swatch?
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2 justify-center pt-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCapturedSnapshot(null);
+                      startCamera(selectedDeviceId, facingMode);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Scan Next Swatch</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCapturedSnapshot(null);
+                      stopCamera();
+                      setMode('simulation');
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 cursor-pointer"
+                  >
+                    Exit Camera
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Interactive Modal if "Ask" was selected */}
           {pendingCaptureColor && (
             <div className="absolute inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
@@ -778,6 +844,7 @@ export default function MiddleContainer({
                     onClick={() => {
                       onTargetSampled && onTargetSampled(pendingCaptureColor);
                       setPendingCaptureColor(null);
+                      setCapturedSnapshot(null);
                       stopCamera();
                       setMode('simulation');
                     }}
@@ -790,6 +857,7 @@ export default function MiddleContainer({
                     onClick={() => {
                       onColorSampled && onColorSampled(pendingCaptureColor);
                       setPendingCaptureColor(null);
+                      setCapturedSnapshot(null);
                       stopCamera();
                       setMode('simulation');
                     }}
@@ -810,6 +878,118 @@ export default function MiddleContainer({
           )}
 
           <canvas ref={canvasRef} className="hidden" />
+        </div>
+
+        {/* Live Optical Color Match & Difference HUD (Mobile-friendly side-by-side live comparison) */}
+        <div className="w-full max-w-xl mt-2.5 bg-[#090f19] border border-slate-700/80 rounded-xl p-2.5 sm:p-3 shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
+            <div className="flex items-center space-x-1.5">
+              <Scale className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-[11px] sm:text-xs font-bold text-slate-200 uppercase tracking-wider">
+                Live Color Comparison &amp; Difference
+              </span>
+            </div>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+              deltaE <= 1.0 
+                ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/50' 
+                : deltaE <= 2.0 
+                  ? 'bg-amber-950 text-amber-300 border border-amber-500/50' 
+                  : 'bg-rose-950 text-rose-300 border border-rose-500/50'
+            }`}>
+              {deltaE <= 1.0 ? 'PASS (MATCH)' : deltaE <= 2.0 ? 'ACCEPTABLE' : 'ADJUST RECIPE'}
+            </span>
+          </div>
+
+          {/* Side-by-Side Swatch & Difference Meter */}
+          <div className="grid grid-cols-12 gap-2 items-center">
+            
+            {/* Target Swatch (Original) */}
+            <div className="col-span-4 bg-[#111927] border border-slate-700 rounded-lg p-2 flex flex-col items-center text-center">
+              <div className="text-[9px] font-mono text-rose-300 uppercase font-bold flex items-center gap-1 mb-1">
+                <Target className="w-2.5 h-2.5 text-rose-400" />
+                <span>Original Standard</span>
+              </div>
+              <div 
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border-2 border-white/40 shadow-inner mb-1.5"
+                style={{ backgroundColor: targetColor }}
+              />
+              <div className="font-mono text-xs font-black text-white">{targetColor}</div>
+              {analysis?.target && (
+                <div className="text-[9px] font-mono text-slate-400 mt-0.5">
+                  L*:{analysis.target.L?.toFixed(0)} a*:{analysis.target.a?.toFixed(0)} b*:{analysis.target.bStar?.toFixed(0)}
+                </div>
+              )}
+            </div>
+
+            {/* Difference Gauge (Delta E & Shifts) */}
+            <div className="col-span-4 flex flex-col items-center justify-center text-center px-1">
+              <div className="text-[9px] font-mono text-slate-400 uppercase font-bold">Total Difference</div>
+              <div className={`font-mono text-xl sm:text-2xl font-black ${
+                deltaE <= 1.0 ? 'text-emerald-400' : deltaE <= 2.0 ? 'text-amber-400' : 'text-rose-400'
+              }`}>
+                &Delta;E {deltaE.toFixed(1)}
+              </div>
+              
+              {/* Optical Shift Badges */}
+              <div className="w-full flex flex-col gap-0.5 mt-1 text-[9px] font-mono">
+                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded">
+                  <span>&Delta;L*:</span>
+                  <span className={analysis?.deltaL > 0 ? 'text-amber-300 font-bold' : 'text-cyan-300 font-bold'}>
+                    {analysis?.deltaL ? (analysis.deltaL > 0 ? `+${analysis.deltaL.toFixed(1)} (Light)` : `${analysis.deltaL.toFixed(1)} (Dark)`) : '0.0'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded">
+                  <span>&Delta;a*:</span>
+                  <span className={analysis?.deltaA > 0 ? 'text-rose-300 font-bold' : 'text-emerald-300 font-bold'}>
+                    {analysis?.deltaA ? (analysis.deltaA > 0 ? `+${analysis.deltaA.toFixed(1)} (Red)` : `${analysis.deltaA.toFixed(1)} (Green)`) : '0.0'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded">
+                  <span>&Delta;b*:</span>
+                  <span className={analysis?.deltaB > 0 ? 'text-yellow-300 font-bold' : 'text-blue-300 font-bold'}>
+                    {analysis?.deltaB ? (analysis.deltaB > 0 ? `+${analysis.deltaB.toFixed(1)} (Yel)` : `${analysis.deltaB.toFixed(1)} (Blue)`) : '0.0'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Sample Swatch (Autoclave Test) */}
+            <div className="col-span-4 bg-[#111927] border border-slate-700 rounded-lg p-2 flex flex-col items-center text-center">
+              <div className="text-[9px] font-mono text-cyan-300 uppercase font-bold flex items-center gap-1 mb-1">
+                <FlaskConical className="w-2.5 h-2.5 text-cyan-400" />
+                <span>Test Sample</span>
+              </div>
+              <div 
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border-2 border-white/40 shadow-inner mb-1.5"
+                style={{ backgroundColor: sampleColor }}
+              />
+              <div className="font-mono text-xs font-black text-white">{sampleColor}</div>
+              {analysis?.sample && (
+                <div className="text-[9px] font-mono text-slate-400 mt-0.5">
+                  L*:{analysis.sample.L?.toFixed(0)} a*:{analysis.sample.a?.toFixed(0)} b*:{analysis.sample.bStar?.toFixed(0)}
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* AI Recommended Action Pill (if mismatch) */}
+          {deltaE > 1.0 && analysis?.advices && analysis.advices.length > 0 && (
+            <div className="mt-2 p-1.5 sm:p-2 rounded-lg bg-purple-950/60 border border-purple-500/40 flex items-center justify-between gap-2">
+              <div className="flex items-center space-x-1.5 min-w-0">
+                <Sparkles className="w-3.5 h-3.5 text-purple-300 flex-shrink-0 animate-pulse" />
+                <span className="text-[10px] sm:text-[11px] text-purple-200 font-medium truncate">
+                  <strong className="text-white">AI Advice:</strong> {analysis.advices[0].text || analysis.advices[0].instruction}
+                </span>
+              </div>
+              <button
+                onClick={onMatchPerfect}
+                className="px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[10px] whitespace-nowrap cursor-pointer shadow active:scale-95 flex-shrink-0"
+              >
+                Equalize
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Action Controls Toolbar & Equalize Card */}
@@ -898,26 +1078,40 @@ export default function MiddleContainer({
           {/* When Camera is active: Capture Bar */}
           {mode === 'webcam' && (
             <div className="flex items-center gap-2 p-2 rounded-xl bg-[#09101b] border border-cyan-500/40 animate-fade-in">
-              {scanDestination === 'TARGET' ? (
+              {capturedSnapshot ? (
                 <button
-                  onClick={() => handleCaptureSample('TARGET')}
-                  className="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
-                >
-                  <Target className="w-4 h-4" />
-                  <span>Capture Original Standard &amp; Turn Off Camera</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleCaptureSample('SAMPLE')}
+                  onClick={() => {
+                    setCapturedSnapshot(null);
+                    startCamera(selectedDeviceId, facingMode);
+                  }}
                   className="flex-1 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
                 >
-                  <FlaskConical className="w-4 h-4" />
-                  <span>Capture Sample Swatch &amp; Turn Off Camera</span>
+                  <Camera className="w-4 h-4" />
+                  <span>Scan Next Swatch</span>
                 </button>
+              ) : (
+                scanDestination === 'TARGET' ? (
+                  <button
+                    onClick={() => handleCaptureSample('TARGET')}
+                    className="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
+                  >
+                    <Target className="w-4 h-4" />
+                    <span>Capture Original Standard</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleCaptureSample('SAMPLE')}
+                    className="flex-1 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
+                  >
+                    <FlaskConical className="w-4 h-4" />
+                    <span>Capture Sample Swatch</span>
+                  </button>
+                )
               )}
 
               <button
                 onClick={() => {
+                  setCapturedSnapshot(null);
                   stopCamera();
                   setMode('simulation');
                 }}
