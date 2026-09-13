@@ -19,12 +19,13 @@ import {
   ShieldCheck, 
   Layers, 
   RotateCcw,
-  Zap
+  Zap,
+  Globe
 } from 'lucide-react';
 import { 
   queryTextileAi, 
   generateBatchDiagnosisAnswer, 
-  AI_SUGGESTED_PROMPTS, 
+  AI_SUGGESTED_PROMPTS_BY_LANG, 
   TEXTILE_KNOWLEDGE_BASE 
 } from '../utils/textileAiEngine';
 import { translations } from '../utils/translations';
@@ -62,7 +63,10 @@ export default function AIAssistantModal({
     waterVolume
   };
 
-  // Initial welcome message with auto batch context
+  // Dynamic suggested prompts for selected language
+  const suggestedPrompts = AI_SUGGESTED_PROMPTS_BY_LANG[currentLang] || AI_SUGGESTED_PROMPTS_BY_LANG.EN;
+
+  // Messages state with multi-lingual initial diagnosis
   const [messages, setMessages] = useState(() => [
     {
       id: 'msg_welcome',
@@ -71,6 +75,18 @@ export default function AIAssistantModal({
       data: generateBatchDiagnosisAnswer(contextData, currentLang)
     }
   ]);
+
+  // When language changes, update initial diagnosis message
+  useEffect(() => {
+    setMessages([
+      {
+        id: `msg_welcome_${currentLang}`,
+        sender: 'bot',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        data: generateBatchDiagnosisAnswer(contextData, currentLang)
+      }
+    ]);
+  }, [currentLang, targetHex, sampleHex, batchId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -109,7 +125,7 @@ export default function AIAssistantModal({
       };
       setMessages(prev => [...prev, botMsg]);
       setIsThinking(false);
-    }, 400);
+    }, 350);
   };
 
   const handleCopyText = (text, id) => {
@@ -132,6 +148,103 @@ export default function AIAssistantModal({
   const deltaE = analysis?.deltaE ?? 4.8;
   const isMatch = deltaE <= 1.0;
 
+  // Localized UI phrases
+  const localizedUI = {
+    EN: {
+      title: "Textile AI Assistant & Search Bot",
+      subtitle: "Ask any question on color matching, dye recipes, ΔE formulas, 14-tray autoclave dosing & safety",
+      activeBatch: "Active Batch:",
+      target: "Target:",
+      sample: "Sample:",
+      diagnoseNow: "Diagnose Batch Now",
+      actionSteps: "Recommended Operator Action Steps:",
+      placeholder: "Ask about color delta, reactive/disperse dye curves, liquor ratio, autoclave trays...",
+      askBtn: "Ask AI",
+      thinking: "Analyzing textile knowledge base & CIEDE2000 colorimetry in English...",
+      equalizeBtn: "Dispense AI Formulation & Equalize (100% Match)"
+    },
+    ES: {
+      title: "Asistente IA y Buscador Textil",
+      subtitle: "Consulta cualquier duda sobre igualación de color, recetas, fórmulas ΔE, dosificación y seguridad",
+      activeBatch: "Lote Activo:",
+      target: "Objetivo:",
+      sample: "Muestra:",
+      diagnoseNow: "Diagnosticar Lote Ahora",
+      actionSteps: "Pasos de Acción Recomendados para el Operario:",
+      placeholder: "Pregunta sobre delta de color, curvas de tintura reactiva/dispersa, relación de baño, bandejas...",
+      askBtn: "Consultar IA",
+      thinking: "Analizando base de conocimiento textil y colorimetría CIEDE2000 en Español...",
+      equalizeBtn: "Dosificar Formulación IA e Igualar (100% Coincidencia)"
+    },
+    FR: {
+      title: "Assistant IA et Moteur de Recherche Textile",
+      subtitle: "Posez vos questions sur le nuançage, recettes, formules ΔE, dosage 14 bacs et sécurité",
+      activeBatch: "Lot Actif :",
+      target: "Cible :",
+      sample: "Échantillon :",
+      diagnoseNow: "Diagnostiquer le Lot",
+      actionSteps: "Étapes Recommandées pour l'Opérateur :",
+      placeholder: "Posez une question sur le delta de couleur, courbes de teinture, rapport de bain...",
+      askBtn: "Demander à l'IA",
+      thinking: "Analyse de la base de connaissances textiles et spectrophotométrie en Français...",
+      equalizeBtn: "Doser la Formule IA et Égaliser (100% Conforme)"
+    },
+    DE: {
+      title: "Textil-KI-Assistent & Suchmaschine",
+      subtitle: "Stellen Sie Fragen zu Farbabgleich, Rezepturen, ΔE-Formeln, 14-Schalen-Dosierung und Sicherheit",
+      activeBatch: "Aktive Charge:",
+      target: "Ziel:",
+      sample: "Probe:",
+      diagnoseNow: "Charge Jetzt Diagnostizieren",
+      actionSteps: "Empfohlene Bedienerschritte:",
+      placeholder: "Fragen zu Farbabstand, Reaktiv-/Dispersionskurven, Flottenverhältnis, Schalen...",
+      askBtn: "KI Fragen",
+      thinking: "Analysiere Textil-Wissensdatenbank und CIEDE2000-Kolorimetrie auf Deutsch...",
+      equalizeBtn: "KI-Rezeptur dosieren & Abgleichen (100% Übereinstimmung)"
+    },
+    NL: {
+      title: "Textiel AI-Assistent & Zoekmachine",
+      subtitle: "Stel vragen over kleuraanpassing, verfrecepten, ΔE-formules, 14-trays dosering en veiligheid",
+      activeBatch: "Actieve Partij:",
+      target: "Doel:",
+      sample: "Monster:",
+      diagnoseNow: "Partij Nu Diagnosticeren",
+      actionSteps: "Aanbevolen Operator Stappen:",
+      placeholder: "Vraag over kleurdelta, reactieve verfcurves, badverhouding, autoclaaf trays...",
+      askBtn: "Vraag AI",
+      thinking: "Textielkennisbank en CIEDE2000 colorimetrie analyseren in het Nederlands...",
+      equalizeBtn: "AI Formule Doseren & Gelijkmaken (100% Match)"
+    },
+    PR: {
+      title: "Assistente IA e Pesquisa Têxtil",
+      subtitle: "Tire dúvidas sobre correspondência de cores, receitas, fórmulas ΔE, dosagem de 14 bandejas e segurança",
+      activeBatch: "Lote Ativo:",
+      target: "Alvo:",
+      sample: "Amostra:",
+      diagnoseNow: "Diagnosticar Lote Agora",
+      actionSteps: "Passos Recomendados para o Operador:",
+      placeholder: "Pergunte sobre delta de cor, curvas de tinturaria, relação de banho, bandejas...",
+      askBtn: "Perguntar à IA",
+      thinking: "A analisar base de dados têxtil e colorimetria CIEDE2000 em Português...",
+      equalizeBtn: "Dosar Formulação IA e Igualar (100% Correspondência)"
+    },
+    Twi: {
+      title: "Ntoma AI Mfididwuma Boafoɔ",
+      subtitle: "Bisa biribiara fa ahosuo siesiee, aduru nhyehyɛe, ΔE nsusuwii, nkyɛm 14 autoclave ne ahobanbɔ ho",
+      activeBatch: "Boole a Ɛkɔ So:",
+      target: "Deɛ Wopɛ:",
+      sample: "Sāmpol:",
+      diagnoseNow: "Hwehwɛ Boole No Mu Seesei",
+      actionSteps: "Akwankyerɛ ma Adwumayɛfoɔ:",
+      placeholder: "Bisa fa ahosuo nsonsonoe, aduru hyew, nsuo dodoɔ, autoclave nkyɛm ho...",
+      askBtn: "Bisa AI",
+      thinking: "Ɛrehwehwɛ ntoma aduru nhyehyɛe ne CIEDE2000 ahosuo nsusuwii mu wɔ Twi kasa mu...",
+      equalizeBtn: "Fa AI Aduru No Gu Mu Ma Ɛnhyia (100% Pɛpɛɛpɛ)"
+    }
+  };
+
+  const ui = localizedUI[currentLang] || localizedUI.EN;
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-in select-none">
       <div className="bg-[#0b121e] border-2 border-slate-700/80 rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col h-[90vh] text-slate-100">
@@ -148,15 +261,15 @@ export default function AIAssistantModal({
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-base sm:text-lg font-black text-white tracking-wide">
-                  Textile AI Assistant &amp; Search Bot
+                  {ui.title}
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-purple-950 border border-purple-500/50 text-[10px] font-mono text-purple-300 font-bold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-purple-400" />
-                  <span>CIEDE2000 AI</span>
+                  <Globe className="w-3 h-3 text-cyan-400" />
+                  <span>{currentLang}</span>
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Ask any question on color matching, dye recipes, ΔE formulas, 14-tray autoclave dosing &amp; safety
+                {ui.subtitle}
               </p>
             </div>
           </div>
@@ -183,17 +296,17 @@ export default function AIAssistantModal({
         <div className="px-4 sm:px-6 py-2 bg-[#080d15] border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
           <div className="flex items-center space-x-3">
             <span className="text-slate-400">
-              Active Batch: <strong className="text-cyan-300">{batchId}</strong>
+              {ui.activeBatch} <strong className="text-cyan-300">{batchId}</strong>
             </span>
             <span className="text-slate-600">|</span>
             <div className="flex items-center space-x-1.5">
-              <span className="text-slate-400">Target:</span>
+              <span className="text-slate-400">{ui.target}</span>
               <span className="w-3 h-3 rounded border border-white/40 shadow-sm" style={{ backgroundColor: targetHex }} />
               <span className="text-rose-400 font-bold">{targetHex}</span>
             </div>
             <span className="text-slate-600">|</span>
             <div className="flex items-center space-x-1.5">
-              <span className="text-slate-400">Sample:</span>
+              <span className="text-slate-400">{ui.sample}</span>
               <span className="w-3 h-3 rounded border border-white/40 shadow-sm" style={{ backgroundColor: sampleHex }} />
               <span className="text-cyan-400 font-bold">{sampleHex}</span>
             </div>
@@ -204,11 +317,11 @@ export default function AIAssistantModal({
           </div>
 
           <button
-            onClick={() => handleSendQuestion('🔬 Diagnose current batch color difference & dosing')}
+            onClick={() => handleSendQuestion(suggestedPrompts[0])}
             className="px-2.5 py-1 rounded bg-purple-950 hover:bg-purple-900 border border-purple-500/50 text-purple-300 text-[11px] font-bold flex items-center space-x-1 cursor-pointer transition-all active:scale-95"
           >
             <Sparkles className="w-3 h-3 text-purple-400" />
-            <span>Diagnose Batch Now</span>
+            <span>{ui.diagnoseNow}</span>
           </button>
         </div>
 
@@ -290,7 +403,7 @@ export default function AIAssistantModal({
                     <div className="space-y-1.5 pt-1">
                       <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Recommended Operator Action Steps:</span>
+                        <span>{ui.actionSteps}</span>
                       </span>
                       <div className="space-y-1">
                         {data.actionSteps.map((step, idx) => (
@@ -314,7 +427,7 @@ export default function AIAssistantModal({
                         className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md cursor-pointer transition-all active:scale-95"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
-                        <span>Dispense AI Formulation &amp; Equalize (100% Match)</span>
+                        <span>{ui.equalizeBtn}</span>
                       </button>
                     </div>
                   )}
@@ -348,7 +461,7 @@ export default function AIAssistantModal({
               </div>
               <div className="bg-[#0f1726] border border-slate-700 rounded-2xl rounded-tl-sm p-3.5 text-xs text-purple-300 flex items-center space-x-2">
                 <div className="w-2 h-2 rounded-full bg-purple-400 animate-ping"></div>
-                <span>Analyzing textile knowledge base &amp; CIEDE2000 colorimetry...</span>
+                <span>{ui.thinking}</span>
               </div>
             </div>
           )}
@@ -359,7 +472,7 @@ export default function AIAssistantModal({
         {/* Suggested Prompts Carousel */}
         <div className="px-4 sm:px-6 py-2 bg-[#090e17] border-t border-slate-800 overflow-x-auto flex items-center space-x-1.5 scrollbar-thin">
           <span className="text-[10px] font-mono text-slate-500 flex-shrink-0 uppercase">Suggested:</span>
-          {AI_SUGGESTED_PROMPTS.map((prompt, idx) => (
+          {suggestedPrompts.map((prompt, idx) => (
             <button
               key={idx}
               onClick={() => handleSendQuestion(prompt)}
@@ -386,7 +499,7 @@ export default function AIAssistantModal({
                 type="text"
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
-                placeholder="Ask about color delta, reactive/disperse dye curves, liquor ratio, autoclave trays..."
+                placeholder={ui.placeholder}
                 className="w-full bg-[#080d15] border border-slate-700 focus:border-purple-500 rounded-xl pl-9 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50 font-sans"
               />
             </div>
@@ -396,7 +509,7 @@ export default function AIAssistantModal({
               disabled={!inputQuery.trim()}
               className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-lg shadow-purple-600/30 transition-all active:scale-95 cursor-pointer"
             >
-              <span>Ask AI</span>
+              <span>{ui.askBtn}</span>
               <Send className="w-3.5 h-3.5" />
             </button>
           </form>
@@ -406,4 +519,3 @@ export default function AIAssistantModal({
     </div>
   );
 }
-

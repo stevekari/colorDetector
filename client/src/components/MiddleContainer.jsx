@@ -56,6 +56,7 @@ export default function MiddleContainer({
   const [isWebcamActive, setIsWebcamActive] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [facingMode, setFacingMode] = useState('environment'); // 'environment' (back) | 'user' (front)
+  const [isSwitchingCamera, setIsSwitchingCamera] = useState(false);
   const [cameraDevices, setCameraDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [capturedSnapshot, setCapturedSnapshot] = useState(null);
@@ -95,108 +96,217 @@ export default function MiddleContainer({
   const canvasRef = useRef(null);
   const chamberRef = useRef(null);
   const scanIntervalRef = useRef(null);
+  const activeStreamRef = useRef(null);
+  const isSwitchingRef = useRef(false);
 
-  // Discover connected camera devices
+  // Discover and classify connected camera devices (Front vs Rear)
   useEffect(() => {
+    let isMounted = true;
     if (navigator.mediaDevices?.enumerateDevices) {
       navigator.mediaDevices.enumerateDevices()
         .then((devices) => {
-          const videoInputs = devices.filter((d) => d.kind === 'videoinput');
+          if (!isMounted) return;
+          const videoInputs = devices.filter((d) => d.kind === 'videoinput').map((d, index) => {
+            const labelLower = (d.label || '').toLowerCase();
+            const isBack = labelLower.includes('back') || labelLower.includes('rear') || labelLower.includes('environment') || labelLower.includes('0') || labelLower.includes('main');
+            const isFront = labelLower.includes('front') || labelLower.includes('user') || labelLower.includes('selfie') || labelLower.includes('facetime') || labelLower.includes('1');
+            return {
+              deviceId: d.deviceId,
+              label: d.label || `Camera ${index + 1}`,
+              isBack,
+              isFront
+            };
+          });
           setCameraDevices(videoInputs);
-          if (videoInputs.length > 0 && !selectedDeviceId) {
-            setSelectedDeviceId(videoInputs[0].deviceId);
-          }
         })
         .catch((err) => console.warn('Device enumeration error:', err));
     }
-  }, [selectedDeviceId]);
+    return () => { isMounted = false; };
+  }, []);
 
-  // Start / Stop Webcam Stream (Robust initialization for Mobile & Desktop)
-  const startCamera = useCallback(async (deviceId, currentFacing = facingMode) => {
-    setCameraError(null);
-    setCapturedSnapshot(null);
-    try {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
+  // Safely stop all active stream tracks and release mobile sensor hardware
+  const releaseActiveStream = useCallback(() => {
+    if (activeStreamRef.current) {
+      try {
+        activeStreamRef.current.getTracks().forEach(track => {
+          track.stop();
+          track.enabled = false;
+        });
+      } catch (e) {
+        console.warn("Track stop error:", e);
+      }
+      activeStreamRef.current = null;
+    }
+    if (videoRef.current) {
+      if (videoRef.current.srcObject) {
+        try {
+          const tracks = videoRef.current.srcObject.getTracks();
+          tracks.forEach(t => {
+            t.stop();
+            t.enabled = false;
+          });
+        } catch (e) {}
         videoRef.current.srcObject = null;
       }
+    }
+  }, []);
 
-      let stream = null;
-      const targetFacing = currentFacing || 'environment';
+  // Bulletproof Start / Switch Camera Stream for Mobile & Desktop
+  const startCameraStream = useCallback(async (targetFacing = facingMode, targetDeviceId = '') => {
+    if (isSwitchingRef.current) return;
+    isSwitchingRef.current = true;
+    setIsSwitchingCamera(true);
+    setCameraError(null);
+    setCapturedSnapshot(null);
 
-      try {
-        const constraints = {
-          video: deviceId 
-            ? { deviceId: { exact: deviceId } } 
-            : { facingMode: { ideal: targetFacing }, width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false
-        };
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (err1) {
-        console.warn("High-res constraint failed, trying basic facingMode:", err1);
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: targetFacing },
-            audio: false
-          });
-        } catch (err2) {
-          console.warn("FacingMode constraint failed, trying generic video:", err2);
-          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    // 1. Release previous active tracks & allow mobile camera hardware delay
+    releaseActiveStream();
+    await new Promise(resolve => setTimeout(resolve, 90));
+
+    let stream = null;
+    let effectiveFacing = targetFacing || 'environment';
+
+    try {
+      // Find matching deviceId if not explicitly passed
+      let deviceIdToUse = targetDeviceId;
+      if (!deviceIdToUse && cameraDevices.length > 0) {
+        if (targetFacing === 'user') {
+          const frontDev = cameraDevices.find(d => d.isFront);
+          if (frontDev) deviceIdToUse = frontDev.deviceId;
+        } else {
+          const backDev = cameraDevices.find(d => d.isBack);
+          if (backDev) deviceIdToUse = backDev.deviceId;
         }
       }
 
-      if (videoRef.current && stream) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute('playsinline', 'true');
-        videoRef.current.setAttribute('webkit-playsinline', 'true');
-        videoRef.current.setAttribute('autoplay', 'true');
-        videoRef.current.setAttribute('muted', 'true');
-        videoRef.current.muted = true;
-
-        videoRef.current.onloadedmetadata = () => {
-          const p = videoRef.current?.play();
-          if (p !== undefined) {
-            p.catch(e => console.warn("Video playback exception:", e));
-          }
-        };
+      // Step 1: Specific Device ID with ideal resolution
+      if (deviceIdToUse) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              deviceId: { exact: deviceIdToUse },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
+        } catch (e1) {
+          console.warn("Target deviceId constraint failed, trying facingMode:", e1);
+        }
       }
-      setIsWebcamActive(true);
-      setMode('webcam');
+
+      // Step 2: Ideal facingMode constraint with HD resolution
+      if (!stream) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: targetFacing },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
+        } catch (e2) {
+          console.warn("Ideal facingMode failed, trying exact facingMode:", e2);
+          // Step 3: Exact facingMode
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: { exact: targetFacing } },
+              audio: false
+            });
+          } catch (e3) {
+            console.warn("Exact facingMode failed, trying string facingMode:", e3);
+            // Step 4: Simple string facingMode
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: targetFacing },
+                audio: false
+              });
+            } catch (e4) {
+              console.warn("Basic facingMode failed, falling back to any video:", e4);
+              // Step 5: Generic video
+              stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: false
+              });
+            }
+          }
+        }
+      }
+
+      if (stream) {
+        activeStreamRef.current = stream;
+
+        // Determine actual facingMode from track settings if available
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack) {
+          const settings = videoTrack.getSettings ? videoTrack.getSettings() : {};
+          if (settings.facingMode) {
+            effectiveFacing = settings.facingMode;
+          }
+        }
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.setAttribute('playsinline', 'true');
+          videoRef.current.setAttribute('webkit-playsinline', 'true');
+          videoRef.current.setAttribute('autoplay', 'true');
+          videoRef.current.setAttribute('muted', 'true');
+          videoRef.current.muted = true;
+
+          videoRef.current.onloadedmetadata = () => {
+            const p = videoRef.current?.play();
+            if (p !== undefined) {
+              p.catch(e => console.warn("Video playback exception:", e));
+            }
+          };
+
+          try {
+            await videoRef.current.play();
+          } catch (e) {
+            // Handled by onloadedmetadata
+          }
+        }
+
+        setFacingMode(effectiveFacing);
+        setIsWebcamActive(true);
+        setMode('webcam');
+      }
     } catch (err) {
       console.error("Camera access error:", err);
       setCameraError(err.message || 'Camera permission denied or camera not found.');
       setIsWebcamActive(false);
       setMode('simulation');
+    } finally {
+      setTimeout(() => {
+        isSwitchingRef.current = false;
+        setIsSwitchingCamera(false);
+      }, 200);
     }
-  }, [facingMode]);
+  }, [cameraDevices, releaseActiveStream, facingMode]);
 
-  const toggleCameraFacing = () => {
+  // Turn / Flip Camera between Rear and Front with 1-tap instant switch
+  const toggleCameraFacing = useCallback(() => {
+    if (isSwitchingRef.current) return;
     const nextFacing = facingMode === 'environment' ? 'user' : 'environment';
-    setFacingMode(nextFacing);
     setSelectedDeviceId('');
-    if (mode === 'webcam') {
-      startCamera('', nextFacing);
-    }
-  };
+    startCameraStream(nextFacing, '');
+  }, [facingMode, startCameraStream]);
 
   const stopCamera = useCallback(() => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    }
+    releaseActiveStream();
     setIsWebcamActive(false);
     setIsLiveScanning(false);
     if (scanIntervalRef.current) {
       clearInterval(scanIntervalRef.current);
       scanIntervalRef.current = null;
     }
-  }, []);
+  }, [releaseActiveStream]);
 
+  // Lifecycle stream manager
   useEffect(() => {
     if (mode === 'webcam') {
-      startCamera(selectedDeviceId, facingMode);
+      startCameraStream(facingMode, selectedDeviceId);
     } else {
       stopCamera();
     }
@@ -204,7 +314,7 @@ export default function MiddleContainer({
     return () => {
       stopCamera();
     };
-  }, [mode, selectedDeviceId, facingMode, startCamera, stopCamera]);
+  }, [mode]); // Only trigger on mode change to avoid race conditions with toggleCameraFacing
 
   // Handle image upload
   const handleImageUpload = (e) => {
@@ -220,7 +330,7 @@ export default function MiddleContainer({
     }
   };
 
-  // High-precision pixel sampling with 5x5 spatial averaging filter
+  // High-precision pixel sampling with 5x5 spatial averaging filter (handles mirrored front camera)
   const extractColorFromVideoOrImage = useCallback((xPercent, yPercent) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -252,7 +362,12 @@ export default function MiddleContainer({
 
     ctx.drawImage(source, 0, 0, sw, sh);
 
-    const centerX = Math.floor((xPercent / 100) * sw);
+    // If front camera is active, it is rendered mirrored with CSS scaleX(-1)
+    const effectiveXPercent = (mode === 'webcam' && facingMode === 'user') 
+      ? (100 - xPercent) 
+      : xPercent;
+
+    const centerX = Math.floor((effectiveXPercent / 100) * sw);
     const centerY = Math.floor((yPercent / 100) * sh);
 
     const radius = 2;
@@ -284,7 +399,7 @@ export default function MiddleContainer({
       console.warn("Pixel sampling exception:", e);
     }
     return null;
-  }, [mode, uploadedImage]);
+  }, [mode, uploadedImage, facingMode]);
 
   // Capture color handler with instant snapshot freeze and clean rescan capability
   const handleCaptureSample = (forcedDestination = null) => {
@@ -296,9 +411,17 @@ export default function MiddleContainer({
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          canvas.width = videoRef.current.videoWidth || 640;
-          canvas.height = videoRef.current.videoHeight || 480;
-          ctx.drawImage(videoRef.current, 0, 0);
+          const vw = videoRef.current.videoWidth || 640;
+          const vh = videoRef.current.videoHeight || 480;
+          canvas.width = vw;
+          canvas.height = vh;
+          ctx.save();
+          if (facingMode === 'user') {
+            ctx.translate(vw, 0);
+            ctx.scale(-1, 1);
+          }
+          ctx.drawImage(videoRef.current, 0, 0, vw, vh);
+          ctx.restore();
           setCapturedSnapshot(canvas.toDataURL('image/jpeg'));
         }
       }
@@ -331,7 +454,7 @@ export default function MiddleContainer({
     setScannerMode('COLOR_SENSOR');
     setCapturedSnapshot(null);
     setMode('webcam');
-    startCamera(selectedDeviceId, facingMode);
+    startCameraStream(facingMode, selectedDeviceId);
   };
 
   // Continuous live scan
@@ -503,7 +626,7 @@ export default function MiddleContainer({
               value={selectedDeviceId}
               onChange={(e) => {
                 setSelectedDeviceId(e.target.value);
-                if (mode === 'webcam') startCamera(e.target.value, facingMode);
+                if (mode === 'webcam') startCameraStream(facingMode, e.target.value);
               }}
               className="bg-[#0a1019] border border-slate-700 text-slate-300 text-xs rounded px-2 py-1 focus:outline-none"
             >
@@ -567,10 +690,11 @@ export default function MiddleContainer({
             {mode === 'webcam' && (
               <button
                 onClick={toggleCameraFacing}
-                className="p-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 hover:text-white text-xs cursor-pointer transition-colors active:rotate-180 duration-300"
-                title={`Flip Camera (Currently: ${facingMode === 'environment' ? 'Rear' : 'Front'})`}
+                disabled={isSwitchingCamera}
+                className="p-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 hover:text-white text-xs cursor-pointer transition-colors active:scale-90"
+                title={`${t.turnCamera} (${facingMode === 'environment' ? (t.backCamera || 'Rear') : (t.frontCamera || 'Front')})`}
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className={`w-3.5 h-3.5 ${isSwitchingCamera ? 'animate-spin-fast' : ''}`} />
               </button>
             )}
 
@@ -622,7 +746,22 @@ export default function MiddleContainer({
         >
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#0c1320_1px,transparent_1px),linear-gradient(to_bottom,#0c1320_1px,transparent_1px)] bg-[size:20px_20px] sm:bg-[size:24px_24px] opacity-40 pointer-events-none"></div>
 
-          {/* On-Camera Target Guide HUD & Instant Camera Flip Button */}
+          {/* Camera Switching 3D Animated Overlay */}
+          {mode === 'webcam' && isSwitchingCamera && (
+            <div className="absolute inset-0 z-50 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center p-3 animate-fade-in pointer-events-none">
+              <div className="p-3.5 rounded-2xl bg-[#0b1424]/95 border border-cyan-400/80 text-white flex flex-col items-center space-y-2 shadow-[0_0_25px_rgba(6,182,212,0.4)]">
+                <RotateCcw className="w-6 h-6 text-cyan-400 animate-spin-fast" />
+                <span className="text-xs font-mono font-bold text-cyan-200 tracking-wide">
+                  {t.switchingCamera || 'Turning Camera...'}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-semibold">
+                  {facingMode === 'user' ? (t.frontCamera || 'Front Camera 🤳') : (t.backCamera || 'Rear Camera 📷')}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* On-Camera Target Guide HUD & Instant Mobile Camera Flip Button */}
           {mode === 'webcam' && (
             <div className="absolute inset-x-2 sm:inset-x-3 top-2 sm:top-3 z-40 flex items-center justify-between gap-1.5 animate-fade-in pointer-events-auto">
               <div className="p-1.5 sm:p-2 rounded-lg bg-black/85 backdrop-blur-md border border-cyan-500/60 text-white text-xs flex items-center space-x-1.5 shadow-2xl min-w-0 flex-1">
@@ -643,18 +782,19 @@ export default function MiddleContainer({
                 </span>
               </div>
 
-              {/* Instant Camera Flip Button (Back / Front) */}
+              {/* Instant Camera Turn / Flip Button (Back / Front) with Tactile Feedback */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleCameraFacing();
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-black/85 hover:bg-black backdrop-blur-md border border-cyan-400 text-cyan-300 hover:text-white shadow-2xl flex items-center space-x-1 cursor-pointer active:scale-90 transition-all flex-shrink-0"
-                title={`Switch camera (Currently ${facingMode === 'environment' ? 'Rear / Back Camera' : 'Front / Selfie Camera'})`}
+                disabled={isSwitchingCamera}
+                className="camera-turn-floating-btn px-2.5 py-1.5 rounded-lg text-cyan-300 hover:text-white shadow-2xl flex items-center space-x-1.5 cursor-pointer active:scale-90 transition-all flex-shrink-0"
+                title={`${t.turnCamera}: ${facingMode === 'environment' ? (t.backCamera || 'Rear') : (t.frontCamera || 'Front')}`}
               >
-                <RotateCcw className="w-3.5 h-3.5 text-cyan-400 active:rotate-180 transition-transform duration-300" />
+                <RotateCcw className={`w-3.5 h-3.5 text-cyan-400 ${isSwitchingCamera ? 'animate-spin-fast' : 'transition-transform duration-300'}`} />
                 <span className="text-[10px] font-mono font-bold">
-                  {facingMode === 'environment' ? 'Rear 📷' : 'Front 🤳'}
+                  {facingMode === 'environment' ? (t.backCamera || 'Rear 📷') : (t.frontCamera || 'Front 🤳')}
                 </span>
               </button>
             </div>
@@ -697,7 +837,7 @@ export default function MiddleContainer({
                 autoPlay 
                 playsInline 
                 muted
-                className="absolute inset-0 w-full h-full object-cover"
+                className={`camera-video-stream ${facingMode === 'user' ? 'camera-mirrored' : ''} ${isSwitchingCamera ? 'camera-flipping-active' : ''}`}
               />
             )
           ) : mode === 'image' && uploadedImage ? (
@@ -823,7 +963,7 @@ export default function MiddleContainer({
                     onClick={(e) => {
                       e.stopPropagation();
                       setCapturedSnapshot(null);
-                      startCamera(selectedDeviceId, facingMode);
+                      startCameraStream(facingMode, selectedDeviceId);
                     }}
                     className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95"
                   >
@@ -1102,18 +1242,21 @@ export default function MiddleContainer({
               {/* Camera Flip button */}
               <button
                 onClick={toggleCameraFacing}
-                className="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white text-xs font-bold border border-slate-600 flex items-center gap-1 cursor-pointer active:scale-95 flex-shrink-0"
-                title={`Flip camera (Currently ${facingMode === 'environment' ? 'Rear' : 'Front'})`}
+                disabled={isSwitchingCamera}
+                className="px-2.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white text-xs font-bold border border-slate-600 flex items-center gap-1.5 cursor-pointer active:scale-95 flex-shrink-0"
+                title={`${t.turnCamera} (${facingMode === 'environment' ? (t.backCamera || 'Rear') : (t.frontCamera || 'Front')})`}
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span className="text-[10px] hidden xs:inline">{facingMode === 'environment' ? 'Rear' : 'Front'}</span>
+                <RotateCcw className={`w-3.5 h-3.5 text-cyan-400 ${isSwitchingCamera ? 'animate-spin-fast' : ''}`} />
+                <span className="text-[10px] hidden xs:inline">
+                  {facingMode === 'environment' ? (t.backCamera || 'Rear 📷') : (t.frontCamera || 'Front 🤳')}
+                </span>
               </button>
 
               {capturedSnapshot ? (
                 <button
                   onClick={() => {
                     setCapturedSnapshot(null);
-                    startCamera(selectedDeviceId, facingMode);
+                    startCameraStream(facingMode, selectedDeviceId);
                   }}
                   className="flex-1 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
                 >

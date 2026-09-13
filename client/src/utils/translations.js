@@ -55,6 +55,10 @@ export const translations = {
     testSwatches: "Test Swatches:",
     assignCapturedAs: "Assign captured scan as:",
     cancel: "Cancel",
+    turnCamera: "Turn Camera",
+    frontCamera: "Front (Selfie) 🤳",
+    backCamera: "Rear (Back) 📷",
+    switchingCamera: "Turning Camera...",
 
     // Right panel
     metricColorData: "Metric & Color Data",
@@ -236,6 +240,10 @@ export const translations = {
     testSwatches: "Muestras de Prueba:",
     assignCapturedAs: "Asignar captura como:",
     cancel: "Cancelar",
+    turnCamera: "Girar Cámara",
+    frontCamera: "Frontal (Selfie) 🤳",
+    backCamera: "Trasera 📷",
+    switchingCamera: "Girando cámara...",
 
     // Right panel
     metricColorData: "Datos Métricos y Color",
@@ -415,6 +423,10 @@ export const translations = {
     testSwatches: "Nuancier de Test :",
     assignCapturedAs: "Attribuer la capture comme :",
     cancel: "Annuler",
+    turnCamera: "Tourner la Caméra",
+    frontCamera: "Frontale 🤳",
+    backCamera: "Arrière 📷",
+    switchingCamera: "Changement de caméra...",
     // Right panel
     metricColorData: "Données Métriques & Couleur",
     realColor: "Couleur Réelle",
@@ -591,6 +603,10 @@ export const translations = {
     testSwatches: "Test-Farbfelder:",
     assignCapturedAs: "Scan zuweisen als:",
     cancel: "Abbrechen",
+    turnCamera: "Kamera Drehen",
+    frontCamera: "Frontkamera 🤳",
+    backCamera: "Rückkamera 📷",
+    switchingCamera: "Kamera wird gewechselt...",
 
     metricColorData: "Metrik- & Farbdaten",
     realColor: "Echte Farbe",
@@ -767,6 +783,10 @@ export const translations = {
     testSwatches: "Teststalen:",
     assignCapturedAs: "Wijs scan toe als:",
     cancel: "Annuleren",
+    turnCamera: "Camera Draaien",
+    frontCamera: "Voorkant 🤳",
+    backCamera: "Achterkant 📷",
+    switchingCamera: "Camera wisselen...",
 
     metricColorData: "Metriek & Kleurgegevens",
     realColor: "Echte Kleur",
@@ -943,6 +963,10 @@ export const translations = {
     testSwatches: "Amostras de Teste:",
     assignCapturedAs: "Atribuir captura como:",
     cancel: "Cancelar",
+    turnCamera: "Girar Câmara",
+    frontCamera: "Frontal (Selfie) 🤳",
+    backCamera: "Traseira 📷",
+    switchingCamera: "A mudar de câmara...",
 
     metricColorData: "Dados Métricos e de Cor",
     realColor: "Cor Real",
@@ -1119,6 +1143,10 @@ export const translations = {
     testSwatches: "Sāmpol Ahosuo:",
     assignCapturedAs: "Fa ahosuo yi sɛ:",
     cancel: "Gyae",
+    turnCamera: "Dane Kāmɛra No",
+    frontCamera: "Anim Kāmɛra 🤳",
+    backCamera: "Akyi Kāmɛra 📷",
+    switchingCamera: "Ɛredane kāmɛra no...",
 
     metricColorData: "Ahosuo Nsɛm ne Nsusuwii",
     realColor: "Ahosuo Ankasa",
