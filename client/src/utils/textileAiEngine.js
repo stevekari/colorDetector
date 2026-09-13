@@ -496,7 +496,8 @@ export function generateBatchDiagnosisAnswer(context = {}, lang = 'EN', customQu
   const isMatch = deltaE <= 1.0;
   const advices = analysis.advices || [];
 
-  const liquorRatio = (waterVolume / fabricKg).toFixed(2);
+  const fabricKg = context.fabricKg || analysis.fabricKg || Math.round(((yardage * 1.6 * (context.fabricGsm || 220)) / 1000.0) * 10.0) / 10.0 || 704.0;
+  const liquorRatio = fabricKg > 0 ? (waterVolume / fabricKg).toFixed(2) : '5.97';
 
   if (currentLang === 'ES') {
     let statusText = isMatch 
