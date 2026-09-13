@@ -10,6 +10,7 @@ import {
   Check, 
   RefreshCw 
 } from 'lucide-react';
+import './PretreatmentModal.css';
 
 export default function PretreatmentModal({
   isOpen,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Check, Target, Pipette, Sparkles, Copy } from 'lucide-react';
 import { parseAnyColor } from '../utils/colorEngine';
 import { translations } from '../utils/translations';
+import './OriginalColorModal.css';
 
 export default function OriginalColorModal({
   isOpen,

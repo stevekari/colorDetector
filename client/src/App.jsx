@@ -15,6 +15,7 @@ import AIAssistantModal from './components/AIAssistantModal';
 import { analyzeColorMatch, hexToRgb, rgbToHex } from './utils/colorEngine';
 import { RECIPE_DATABASE, getRecipeById } from './utils/recipeDatabase';
 import { translations } from './utils/translations';
+import './App.css';
 
 export default function App() {
   // Screen Navigation State: 'DASHBOARD' | 'AUTOCLAVE'
@@ -324,7 +325,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#070b12] text-slate-100 flex flex-col justify-between">
+    <div className="app-root-container min-h-screen w-full max-w-full overflow-x-clip bg-[#070b12] text-slate-100 flex flex-col justify-between">
       
       {/* Top Navigation Bar with Language Switcher, Recipe Loader & Tools */}
       <TopNavbar 
@@ -564,6 +565,8 @@ export default function App() {
         clientCode={clientCode}
         targetHex={targetHex}
         sampleHex={sampleHex}
+        targetColor={analysis?.target}
+        sampleColor={analysis?.sample}
         analysis={analysis}
         yardage={yardage}
         waterVolume={waterVolume}

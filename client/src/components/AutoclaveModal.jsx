@@ -11,6 +11,7 @@ import {
   AlertCircle,
   FileSpreadsheet
 } from 'lucide-react';
+import './AutoclaveModal.css';
 
 export default function AutoclaveModal({
   isOpen,

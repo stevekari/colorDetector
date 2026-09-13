@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { TRAY_CHEMICAL_PRESETS, DYE_BOX_DATABASE } from '../utils/dyeDatabase';
+import './AutoclaveScreen.css';
 
 export default function AutoclaveScreen({
   batchId = '#1245',

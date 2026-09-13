@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { DYE_BOX_DATABASE, findDyeByBoxCode } from '../utils/dyeDatabase';
 import { translations } from '../utils/translations';
+import './DyeInventoryModal.css';
 
 export default function DyeInventoryModal({
   isOpen,

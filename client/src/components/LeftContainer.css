@@ -1,0 +1,66 @@
+/* ==========================================================================
+   LeftContainer.css - Color Evaluation, CIEDE2000 Difference & Match Advice
+   ========================================================================== */
+
+.left-panel-container {
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+}
+
+/* Header */
+.left-panel-header {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to right, #172338, #111a2a);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .left-panel-header {
+    padding: 0.75rem 1.25rem;
+  }
+}
+
+/* Difference Card */
+.delta-difference-card {
+  border-radius: 0.75rem;
+  padding: 0.875rem;
+  background: linear-gradient(180deg, #fcedc7 0%, #fae3ad 50%, #f4d793 100%);
+  color: #0f172a;
+  border: 2px solid #e5c06d;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Tone Analysis Bars */
+.tone-shift-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.5rem;
+  background-color: #0b121e;
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.6875rem;
+}
+
+/* AI Chemical Recipe Recommendation Pill */
+.recipe-advice-card {
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: linear-gradient(180deg, #131d2e 0%, #0d1422 100%);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

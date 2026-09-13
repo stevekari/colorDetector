@@ -1,0 +1,88 @@
+/* ==========================================================================
+   DyeDosingReceiptModal.css - Printable Batch Recipe Ticket & PDF Sheet
+   ========================================================================== */
+
+.receipt-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.receipt-paper-document {
+  background-color: #ffffff;
+  color: #0f172a;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  padding: 1.5rem;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  width: 100%;
+  max-width: 54rem;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+/* Print Styles: Ensure full fidelity and exact color swatches on physical paper / PDF */
+@media print {
+  @page {
+    margin: 10mm;
+    size: A4 portrait;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Hide everything except the printable receipt sheet */
+  body * {
+    visibility: hidden;
+  }
+
+  .receipt-paper-document,
+  .receipt-paper-document * {
+    visibility: visible;
+  }
+
+  .receipt-paper-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Color Swatches preservation during print */
+  [style*="background-color"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

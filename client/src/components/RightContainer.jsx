@@ -14,10 +14,12 @@ import {
   Scale,
   Droplet,
   Equal,
-  FileText
+  FileText,
+  Printer
 } from 'lucide-react';
 import { parseAnyColor } from '../utils/colorEngine';
 import { translations } from '../utils/translations';
+import './RightContainer.css';
 
 export default function RightContainer({
   targetColor,
@@ -505,10 +507,10 @@ export default function RightContainer({
             <button
               onClick={onOpenDosingReceipt}
               className="py-1.5 px-1.5 rounded-lg bg-[#201912] hover:bg-[#2d2218] border border-amber-500/50 text-amber-300 text-[10px] font-semibold flex items-center justify-center space-x-1 transition-colors cursor-pointer truncate"
-              title="Print industrial dosing receipt / ticket"
+              title="Print Color Match Correction Ticket (PDF)"
             >
-              <FileText className="w-3 h-3 text-amber-400 flex-shrink-0" />
-              <span className="truncate">Ticket</span>
+              <Printer className="w-3 h-3 text-amber-400 flex-shrink-0" />
+              <span className="truncate">Print Recipe</span>
             </button>
 
             <button

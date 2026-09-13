@@ -163,7 +163,21 @@ export const translations = {
     manualDispensing: "MANUAL DISPENSING",
     officialTicketSub: "Official batch recipe ticket for manual scale weighing & human dye-house additions",
     printTicketPdf: "Print Ticket / PDF",
-    close: "Close"
+    close: "Close",
+
+    // Color Correction & Matching Additions
+    colorCorrectionTitle: "COLOR MATCH CORRECTION DOSING (TO MATCH ORIGINAL)",
+    colorCorrectionSubtitle: "Precise spectrophotometric dye additions to equalize measured shade with original client standard",
+    originalStandardTitle: "Original Standard Color (Target)",
+    currentSampleTitle: "Current Measured Sample",
+    varianceDelta: "Total Delta Variance",
+    dyesToEqualizeTitle: "DYES & CHEMICALS TO ADD (TO EQUALIZE COLOR TO ORIGINAL)",
+    exactGramsToWeigh: "Exact Weight to Add",
+    predictedMatchNotice: "Predicted Outcome: 100% Target Match with Original Color (ΔE ≤ 0.8 OK)",
+    printColorMatchTicket: "Print Color Match Correction Ticket (PDF)",
+    baseRecipeDyeing: "1. BASE DYEING FORMULATION",
+    correctionAdditionsSection: "2. COLOR MATCH CORRECTION ADDITIONS",
+    noCorrectionsNeededNote: "Zero color additions required. Current batch matches original standard perfectly."
   },
 
   ES: {
@@ -330,7 +344,21 @@ export const translations = {
     manualDispensing: "DISPENSACIÓN MANUAL",
     officialTicketSub: "Ficha oficial de receta de lote para pesado manual en balanza y adiciones humanas",
     printTicketPdf: "Imprimir Recibo / PDF",
-    close: "Cerrar"
+    close: "Cerrar",
+
+    // Color Correction & Matching Additions
+    colorCorrectionTitle: "DOSIFICACIÓN DE CORRECCIÓN (PARA IGUALAR AL COLOR ORIGINAL)",
+    colorCorrectionSubtitle: "Adiciones precisas de colorantes para igualar la muestra escaneada con el estándar original",
+    originalStandardTitle: "Color Estándar Original (Objetivo)",
+    currentSampleTitle: "Muestra Medida Actual",
+    varianceDelta: "Varianza Total Delta",
+    dyesToEqualizeTitle: "COLORANTES Y QUÍMICOS A AÑADIR (PARA IGUALAR AL COLOR ORIGINAL)",
+    exactGramsToWeigh: "Peso Exacto a Añadir",
+    predictedMatchNotice: "Resultado Previsto: Coincidencia del 100% con Color Original (Tolerancia ΔE ≤ 0.8 OK)",
+    printColorMatchTicket: "Imprimir Ticket de Corrección de Color (PDF)",
+    baseRecipeDyeing: "1. FORMULACIÓN DE TINTURA BASE",
+    correctionAdditionsSection: "2. ADICIONES DE CORRECCIÓN PARA COLOR ORIGINAL",
+    noCorrectionsNeededNote: "Cero adiciones de colorante necesarias. El lote coincide perfectamente con el estándar original."
   },
 
   FR: {
@@ -492,7 +520,21 @@ export const translations = {
     manualDispensing: "DOSAGE MANUEL",
     officialTicketSub: "Fiche officielle de recette pour pesée manuelle sur balance et ajouts en teinturerie",
     printTicketPdf: "Imprimer Reçu / PDF",
-    close: "Fermer"
+    close: "Fermer",
+
+    // Color Correction & Matching Additions
+    colorCorrectionTitle: "DOSAGE DE CORRECTION (POUR ATTEINDRE LA COULEUR ORIGINALE)",
+    colorCorrectionSubtitle: "Ajouts spectrophotométriques précis de colorants pour égaliser l'échantillon avec le standard d'origine",
+    originalStandardTitle: "Couleur Standard Originale (Cible)",
+    currentSampleTitle: "Échantillon Mesuré Actuel",
+    varianceDelta: "Variance Totale Delta",
+    dyesToEqualizeTitle: "COLORANTS ET PRODUITS À AJOUTER (POUR ÉGALISER À LA COULEUR ORIGINALE)",
+    exactGramsToWeigh: "Poids Exact à Ajouter",
+    predictedMatchNotice: "Résultat Prévu: Correspondance à 100% avec la Couleur Originale (Tolérance ΔE ≤ 0.8 OK)",
+    printColorMatchTicket: "Imprimer le Ticket de Correction de Couleur (PDF)",
+    baseRecipeDyeing: "1. FORMULATION DE TEINTURE DE BASE",
+    correctionAdditionsSection: "2. AJOUTS DE CORRECTION POUR COULEUR ORIGINALE",
+    noCorrectionsNeededNote: "Zéro ajout de colorant nécessaire. Le lot actuel correspond parfaitement au standard original."
   },
 
   DE: {
@@ -654,7 +696,21 @@ export const translations = {
     manualDispensing: "MANUELLE DOSIERUNG",
     officialTicketSub: "Offizieller Chargenbeleg für manuelle Waageneinwaage und manuelle Zugaben",
     printTicketPdf: "Beleg Drucken / PDF",
-    close: "Schließen"
+    close: "Schließen",
+
+    // Color Correction & Matching Additions
+    colorCorrectionTitle: "FARBKORREKTUR-DOSIERUNG (ZUR ERREICHUNG DER ORIGINALFARBE)",
+    colorCorrectionSubtitle: "Präzise spektralphotometrische Farbstoffzugaben zur Angleichung der Messprobe an den Originalstandard",
+    originalStandardTitle: "Original-Standardfarbe (Ziel)",
+    currentSampleTitle: "Aktuell gemessene Probe",
+    varianceDelta: "Gesamte Delta-Abweichung",
+    dyesToEqualizeTitle: "FARBSTOFFE UND CHEMIKALIEN ZUR FARBANPASSUNG AN DAS ORIGINAL",
+    exactGramsToWeigh: "Exaktes Zugabegewicht",
+    predictedMatchNotice: "Erwartetes Ergebnis: 100% Farbübereinstimmung mit Original (Toleranz ΔE ≤ 0.8 OK)",
+    printColorMatchTicket: "Farbkorrektur-Rezeptticket drucken (PDF)",
+    baseRecipeDyeing: "1. BASIS-FÄRBEREZEPTUR",
+    correctionAdditionsSection: "2. SPEKTROPHOTOMETRISCHE KORREKTUR-ZUGABEN",
+    noCorrectionsNeededNote: "Keine Farbstoffkorrekturen erforderlich. Aktuelle Charge entspricht exakt dem Originalstandard."
   },
 
   NL: {
@@ -816,7 +872,21 @@ export const translations = {
     manualDispensing: "HANDMATIGE DOSERING",
     officialTicketSub: "Officieel receptticket voor handmatig afwegen en handmatige toevoegingen",
     printTicketPdf: "Bon Afdrukken / PDF",
-    close: "Sluiten"
+    close: "Sluiten",
+
+    // Color Correction & Matching Additions
+    colorCorrectionTitle: "KLEURCORRECTIE DOSERING (OM ORIGINELE KLEUR TE BEREIKEN)",
+    colorCorrectionSubtitle: "Exacte spectrofotometrische kleurstof toevoegingen om het monster gelijk te maken aan de originele standaard",
+    originalStandardTitle: "Originele Standaardkleur (Doel)",
+    currentSampleTitle: "Huidig Gemeten Monster",
+    varianceDelta: "Totale Delta Afwijking",
+    dyesToEqualizeTitle: "TOE TE VOEGEN KLEURSTOFFEN (VOOR ORIGINELE KLEUR)",
+    exactGramsToWeigh: "Exact Toe te Voegen Gewicht",
+    predictedMatchNotice: "Verwacht Resultaat: 100% Overeenkomst met Originele Kleur (Tolerantie ΔE ≤ 0.8 OK)",
+    printColorMatchTicket: "Kleurcorrectie Ticket Afdrukken (PDF)",
+    baseRecipeDyeing: "1. BASIS VERFFORMULE",
+    correctionAdditionsSection: "2. SPECTROFOTOMETRISCHE CORRECTIE TOEVOEGINGEN",
+    noCorrectionsNeededNote: "Geen kleurstofcorrecties nodig. Huidige partij komt exact overeen met de originele standaard."
   },
 
   PR: {
@@ -978,7 +1048,21 @@ export const translations = {
     manualDispensing: "DISPENSAÇÃO MANUAL",
     officialTicketSub: "Ficha oficial de receita de lote para pesagem manual na balança e adições humanas",
     printTicketPdf: "Imprimir Recibo / PDF",
-    close: "Fechar"
+    close: "Fechar",
+
+    // Color Correction & Matching Additions
+    colorCorrectionTitle: "DOSAGEM DE CORREÇÃO DE COR (PARA IGUALAR À COR ORIGINAL)",
+    colorCorrectionSubtitle: "Adições espectrofotométricas precisas de corantes para igualar a amostra medida ao padrão original",
+    originalStandardTitle: "Cor Padrão Original (Alvo)",
+    currentSampleTitle: "Amostra Medida Atual",
+    varianceDelta: "Variação Total Delta",
+    dyesToEqualizeTitle: "CORANTES E QUÍMICOS A ADICIONAR (PARA IGUALAR À COR ORIGINAL)",
+    exactGramsToWeigh: "Peso Exato a Adicionar",
+    predictedMatchNotice: "Resultado Previsto: 100% de Correspondência com a Cor Original (Tolerância ΔE ≤ 0.8 OK)",
+    printColorMatchTicket: "Imprimir Ticket de Correção de Cor (PDF)",
+    baseRecipeDyeing: "1. FORMULAÇÃO DE TINTURARIA BASE",
+    correctionAdditionsSection: "2. ADIÇÕES DE CORREÇÃO PARA A COR ORIGINAL",
+    noCorrectionsNeededNote: "Zero adições de corantes necessárias. O lote atual corresponde exatamente ao padrão original."
   },
 
   Twi: {
@@ -1140,7 +1224,21 @@ export const translations = {
     manualDispensing: "NSA ANO DOSING",
     officialTicketSub: "Aban krataa a wode kyerɛ aduru susudodoɔ ne nsa ano dwumadie",
     printTicketPdf: "Tintim Krataa / PDF",
-    close: "To Mu"
+    close: "To Mu",
+
+    // Color Correction & Matching Additions
+    colorCorrectionTitle: "AHOSUO NSIESIEE AKWANKYERƐ (SƐDEƐ ƐBƐYƐ PƐ NE DEƐ WOPƐ)",
+    colorCorrectionSubtitle: "Aduru pɔtee a wode bɛka ho ama ntoma ahosuo no ne deɛ wopɛ ankasa ayɛ pɛpɛɛpɛ",
+    originalStandardTitle: "Deɛ Wopɛ Ankasa (Original)",
+    currentSampleTitle: "Deɛ Ɛbae Seesei (Sāmpol)",
+    varianceDelta: "Nsonsonoe Dodoɔ (ΔE)",
+    dyesToEqualizeTitle: "ADURU NE AHOSUO A ƐSƐ SƐ WODE KA HO (SƐDEƐ ƐBƐYƐ PƐ NE ORIGINAL)",
+    exactGramsToWeigh: "Mu Dur Pɔtee a Wobɛsusu",
+    predictedMatchNotice: "Deɛ Ɛbɛba: Ɛbɛhyia Pɛpɛɛpɛ 100% ne Original Ahosuo (Gyinapɛn ΔE ≤ 0.8 EYE)",
+    printColorMatchTicket: "Tintim Ahosuo Nsiesiee Krataa (PDF)",
+    baseRecipeDyeing: "1. TINTURA DODE ADURU NHYEHYƐE",
+    correctionAdditionsSection: "2. AHOSUO NSIESIEE ADURU A WODE BƐKA HO",
+    noCorrectionsNeededNote: "Ɛnhia aduru foforo biara. Ntoma no ne original ahosuo no hyia pɛpɛɛpɛ."
   }
 };
 

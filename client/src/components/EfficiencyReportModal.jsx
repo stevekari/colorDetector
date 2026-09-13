@@ -13,6 +13,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { translations } from '../utils/translations';
+import './EfficiencyReportModal.css';
 
 export default function EfficiencyReportModal({
   isOpen,

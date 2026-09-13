@@ -28,6 +28,7 @@ import {
 import { rgbToHex, hexToRgb, rgbToLab, rgbToCmyk, rgbToHsl } from '../utils/colorEngine';
 import { DYE_BOX_DATABASE, findDyeByBoxCode } from '../utils/dyeDatabase';
 import { translations } from '../utils/translations';
+import './MiddleContainer.css';
 
 export default function MiddleContainer({
   sampleColor = '#D2453A',

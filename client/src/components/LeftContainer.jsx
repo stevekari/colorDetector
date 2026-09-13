@@ -15,6 +15,7 @@ import {
   Printer
 } from 'lucide-react';
 import { translations } from '../utils/translations';
+import './LeftContainer.css';
 
 export default function LeftContainer({
   analysis,
@@ -292,15 +293,15 @@ export default function LeftContainer({
           </div>
         </div>
 
-        {/* Print Dosing Ticket Button */}
+        {/* Print Color Match Correction Ticket Button */}
         <div className="space-y-2 pt-1">
           <button
             onClick={onOpenDosingReceipt}
-            className="w-full py-2 px-3 rounded-lg bg-[#1a1728] hover:bg-[#261f3d] border border-amber-500/50 text-amber-300 font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer active:scale-95 shadow-sm"
-            title="Open printable industrial recipe sheet for human weighing and manual dye dispensary"
+            className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#1f1a30] via-[#2a1e3f] to-[#1f1a30] hover:from-[#2d2247] hover:to-[#2d2247] border border-amber-500/60 text-amber-300 font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer active:scale-95 shadow-md group"
+            title="Open printable industrial recipe sheet for human weighing and exact color matching additions"
           >
-            <FileText className="w-3.5 h-3.5 text-amber-400" />
-            <span>Print Dosing Ticket (PDF)</span>
+            <Printer className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+            <span className="truncate">{t.printColorMatchTicket || 'Print Color Match Correction Ticket (PDF)'}</span>
           </button>
 
           {/* Bottom Status Button */}

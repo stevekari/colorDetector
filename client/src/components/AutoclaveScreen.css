@@ -1,0 +1,89 @@
+/* ==========================================================================
+   AutoclaveScreen.css - 14-Tray Chemical Controller, Thermal Cycle & Flow
+   ========================================================================== */
+
+.autoclave-screen-container {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: #060a12;
+  color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 14-Tray Grid Layout */
+.tray-grid-container {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .tray-grid-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tray-grid-container {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .tray-grid-container {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1536px) {
+  .tray-grid-container {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+/* Individual Chemical Tray Card */
+.tray-card {
+  position: relative;
+  background: linear-gradient(180deg, #131c2c 0%, #0c121e 100%);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.tray-card:hover {
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+/* Thermal Cycle Monitor Card */
+.thermal-cycle-card {
+  background: linear-gradient(180deg, #141f32 0%, #0d1522 100%);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+/* Chemical Circulation Tank Visualizer */
+.circulation-tank-visualizer {
+  position: relative;
+  width: 100%;
+  height: 12rem;
+  background: radial-gradient(circle at center, #0f1c30 0%, #070c16 100%);
+  border: 2px solid #1e293b;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

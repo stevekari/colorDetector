@@ -28,6 +28,7 @@ import {
   TEXTILE_KNOWLEDGE_BASE 
 } from '../utils/textileAiEngine';
 import { translations } from '../utils/translations';
+import './AIAssistantModal.css';
 
 export default function AIAssistantModal({
   isOpen,
